@@ -13,9 +13,6 @@
 using namespace std;
 using namespace cv;
 
-Mat ts_img (128, 128, CV_8UC1, 1);
-int cntr = 0;
-
 static atomic_bool globalShutdown(false);
 
 static void globalShutdownSignalHandler(int signal) {
@@ -32,6 +29,10 @@ static void usbShutdownHandler(void *ptr) {
 }
 
 int main(void) {
+
+Mat ts_img (128, 128, CV_8UC1, 1);
+int cntr = 0;
+
 // Install signal handler for global shutdown.
 #if defined(_WIN32)
 	if (signal(SIGTERM, &globalShutdownSignalHandler) == SIG_ERR) {
@@ -142,7 +143,7 @@ int main(void) {
 				if (cntr%2 == 0) {
 					cntr = 0;
 					imshow("Time Surface Image",ts_img);
-				  waitKey(1);
+				 waitKey(1);
 
 					ts_img = ts_img - 8;
 				}

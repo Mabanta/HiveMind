@@ -13,10 +13,6 @@
 using namespace std;
 using namespace cv;
 
-Mat ts_img (128, 128, CV_8UC1, 128);
-Mat_<float> tmpfloat_img (128, 128);
-int cntr = 0;
-
 static atomic_bool globalShutdown(false);
 
 static void globalShutdownSignalHandler(int signal) {
@@ -33,6 +29,11 @@ static void usbShutdownHandler(void *ptr) {
 }
 
 int main(void) {
+Mat ts_img (128, 128, CV_8UC1, 128);
+Mat_<float> tmpfloat_img (128, 128);
+int cntr = 0;
+
+
 // Install signal handler for global shutdown.
 #if defined(_WIN32)
 	if (signal(SIGTERM, &globalShutdownSignalHandler) == SIG_ERR) {

@@ -13,23 +13,6 @@
 using namespace std;
 using namespace cv;
 
-//----------- Timmer's Code -----------
-int chs = 8;   // cluster half size box starts at 16x16
-Mat ts_img (128, 128, CV_8UC1, 128);
-Mat clust_img (128, 128, CV_8UC3);
-Mat sub_mat;
-//Mat_<float> tmpfloat_img (128, 128);
-bool not_in_a_cluster;
-int cntr = 0;
-int xx, yy;
-int numclusters;
-int cluster_thresh = 20;
-double cluster_activity;
-float clusters[5][4] = {{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0}};   // 4 clusters of x, y, size (in pixels)
-// x, y, size, timeout
-int x1, x2, y1, y2, subx, suby;
-vector<int> sortvec;
-// -----------------------
 static atomic_bool globalShutdown(false);
 
 static void globalShutdownSignalHandler(int signal) {
@@ -46,6 +29,26 @@ static void usbShutdownHandler(void *ptr) {
 }
 
 int main(void) {
+//----------- Timmer's Code -----------
+int chs = 8;   // cluster half size box starts at 16x16
+Mat ts_img (128, 128, CV_8UC1, 128);
+Mat clust_img (128, 128, CV_8UC3);
+Mat sub_mat;
+//Mat_<float> tmpfloat_img (128, 128);
+bool not_in_a_cluster;
+int cntr = 0;
+int xx, yy;
+int numclusters;
+int cluster_thresh = 20;
+double cluster_activity;
+float clusters[5][4] = {{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0}};   // 4 clusters of x, y, size (in pixels)
+
+vector<int> sortvec;
+// -----------------------
+
+//y1 is defined in another library, so must be defined locally
+// x, y, size, timeout
+int x1, x2, y1, y2, subx, suby;
 
 // Timmer's opencv setup code
 namedWindow ( "Clusters");
