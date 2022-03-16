@@ -1,6 +1,8 @@
 
 *.exe
 .vscode/tasks.json
+.vscode/settings.json
+.vscode/c_cpp_properties.json
 from_prof_horiuchi/build/CMakeFiles/cmake.check_cache
 from_prof_horiuchi/build/CMakeFiles/CMakeDirectoryInformation.cmake
 from_prof_horiuchi/build/CMakeFiles/CMakeOutput.log
