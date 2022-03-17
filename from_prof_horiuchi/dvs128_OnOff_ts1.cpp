@@ -29,6 +29,8 @@ static void usbShutdownHandler(void *ptr) {
 }
 
 int main(void) {
+
+// matrix holding the time surface
 Mat ts_img (128, 128, CV_8UC1, 128);
 Mat_<float> tmpfloat_img (128, 128);
 int cntr = 0;
@@ -121,6 +123,7 @@ int cntr = 0;
 
 			//printf("Packet of type %d -> %d events, %d capacity.\n", packet->getEventType(), packet->getEventNumber(), packet->getEventCapacity());
 
+			// only process polarity spikes
 			if (packet->getEventType() == POLARITY_EVENT) {
 				std::shared_ptr<const libcaer::events::PolarityEventPacket> polarity
 					= std::static_pointer_cast<libcaer::events::PolarityEventPacket>(packet);
@@ -137,6 +140,8 @@ int cntr = 0;
 
 					//printf("Event - ts: %d, x: %d, y: %d, pol: %d.\n", ts, x, y, pol);
 					//printf ("%d",ts_img.at<uchar>(x,y));
+
+					// fully saturate given an on spike, or drop down with off
 					if (pol == 1) {
 						ts_img.at<uchar>(y,x) = 255;
 					}
@@ -144,13 +149,15 @@ int cntr = 0;
 						ts_img.at<uchar>(y,x) = 0;
 					}
 				}
+
+				// only display and decay every second 
 				cntr++;
 				if (cntr%2 == 0) {
 					cntr = 0;
 					imshow("Time Surface Image",ts_img);
-				  waitKey(1);
+				  	waitKey(1);
 					tmpfloat_img = ts_img - 128;
-					ts_img += -0.2*tmpfloat_img;
+					ts_img += -0.2*tmpfloat_img; // exponential decay of ts
 				}
 				//auto t2 = std::chrono::high_resolution_clock::now();
 				//std::cout << "f() took "
