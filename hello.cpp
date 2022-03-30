@@ -14,8 +14,6 @@ int main()
     std::cout << "dummyVar is now: " << dummyVar << std::endl;
     std::cout << "5! = " << factorial(5) << std::endl;
     return 0;
-
-    return 0;
 }
 
 int add(int a, int b)
