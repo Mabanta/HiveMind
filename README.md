@@ -2,8 +2,9 @@
 Repository for GEMSTONE team Hive Mind
 
 # Changes for the branch
-This is me modifying the README so that it shows up as a change :P
+This is me modifying the README so that it shows up as a change :P :P :P
 
-Making changes to the readme
+# Sign when you have Git Working!
+Matthew Lynch
 
 Daniel was here.
