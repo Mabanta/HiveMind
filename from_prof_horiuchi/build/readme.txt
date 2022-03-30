@@ -3,4 +3,4 @@ files that CMake uses when compiling.
 
 To compile using CMake, run "cmake .." and then "make -j2 -s", which will
 create the shared object files. Then run "sudo make install" to install 
-the files in dv/modules
+the files in dv/modules.

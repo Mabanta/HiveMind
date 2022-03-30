@@ -31,9 +31,12 @@ static void usbShutdownHandler(void *ptr) {
 int main(void) {
 //----------- Timmer's Code -----------
 int chs = 16;   // cluster half size box starts at 16x16
+
+// matrix holding the time surface
 Mat ts_img (128, 128, CV_8UC1, 128);
 Mat clust_img (128+2*chs, 130+2*chs, CV_8UC3);
 Mat sub_mat;
+
 //Mat_<float> tmpfloat_img (128, 128);
 int cntr = 0;
 int cluster_thresh = 150;
@@ -138,6 +141,7 @@ namedWindow ( "Clusters");
 
 			//printf("Packet of type %d -> %d events, %d capacity.\n", packet->getEventType(), packet->getEventNumber(), packet->getEventCapacity());
 
+			// only process polarity spikes
 			if (packet->getEventType() == POLARITY_EVENT) {
 				std::shared_ptr<const libcaer::events::PolarityEventPacket> polarity
 					= std::static_pointer_cast<libcaer::events::PolarityEventPacket>(packet);
@@ -172,6 +176,7 @@ namedWindow ( "Clusters");
 						}
 					}
 				}
+
 				cntr++;
 				if (cntr%2 == 0) {
 					cntr = 0;
@@ -185,6 +190,7 @@ namedWindow ( "Clusters");
 						if (x1 > 127) x1 = 127;
 						if (y1 > 127) y1 = 127;
 						Point p1 (x1, y1);
+
 						x2 = x1 + chs;
 						y2 = y1 + chs;
 						if (x2 < 0) x2 = 0;
@@ -192,21 +198,23 @@ namedWindow ( "Clusters");
 						if (x2 > 127) x2 = 127;
 						if (y2 > 127) y2 = 127;
 						Point p2 (x2, y2);
+
 						clust_img = ts_img.clone();
+
 						sub_mat = ts_img(Rect(x1,y1,x2-x1,y2-y1)); // grab the cluster box
-						if (sum(sub_mat).val[0] < 1000) {
+						if (sum(sub_mat).val[0] < 1000) { // not enough activity in the box
 							clusters[0][0] = 0;  // kill the cluster for the next round
 							imshow("Clusters",clust_img);
 							resizeWindow("Clusters", 200, 200); // bigger so that we can grab the top to move it.
-				  		waitKey(1);
-							ts_img *= 0.7;
+				  			waitKey(1);
+							ts_img *= 0.7; // exponential decay of ts
 						}
 						else {
 							rectangle(clust_img, p1, p2, 255); // draw rectangle
 							imshow("Clusters",clust_img);
 							resizeWindow("Clusters", 200, 200); // bigger so that we can grab the top to move it.
-				  		waitKey(1);
-							ts_img *= 0.7;
+				  			waitKey(1);
+							ts_img *= 0.7; // exponential decay of ts
 						}
 					}
 					else { // no active clusters, draw ts_img
@@ -214,7 +222,7 @@ namedWindow ( "Clusters");
 						imshow("Clusters",clust_img);
 						resizeWindow("Clusters", 200, 200); // bigger so that we can grab the top to move it.
 						waitKey(1);
-						ts_img *= 0.7;
+						ts_img *= 0.7; // exponential decay of ts
 					}
 				}
 			}
