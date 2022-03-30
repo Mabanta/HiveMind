@@ -29,30 +29,32 @@ static void usbShutdownHandler(void *ptr) {
 }
 
 int main(void) {
-//----------- Timmer's Code -----------
-int chs = 8;   // cluster half size box starts at 16x16
-Mat ts_img (128, 128, CV_8UC1, 128);
-Mat clust_img (128, 128, CV_8UC3);
-Mat sub_mat;
-//Mat_<float> tmpfloat_img (128, 128);
-bool not_in_a_cluster;
-int cntr = 0;
-int xx, yy;
-int numclusters;
-int cluster_thresh = 20;
-double cluster_activity;
-float clusters[5][4] = {{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0},{-100,0,0,0}};   // 4 clusters of x, y, size (in pixels)
+	//----------- Timmer's Code -----------
+	int chs = 8; // cluster half size box starts at 16x16
 
-vector<int> sortvec;
-// -----------------------
+	// matrix holding the time surface
+	Mat ts_img(128, 128, CV_8UC1, 128);
+	Mat clust_img(128, 128, CV_8UC3);
+	Mat sub_mat;
+	// Mat_<float> tmpfloat_img (128, 128);
+	bool not_in_a_cluster;
+	int cntr = 0;
+	int xx, yy;
+	int numclusters;
+	int cluster_thresh = 20;
+	double cluster_activity;
+	float clusters[5][4] = {{-100, 0, 0, 0}, {-100, 0, 0, 0}, {-100, 0, 0, 0}, {-100, 0, 0, 0}, {-100, 0, 0, 0}}; // 4 clusters of x, y, size (in pixels)
 
-//y1 is defined in another library, so must be defined locally
-// x, y, size, timeout
-int x1, x2, y1, y2, subx, suby;
+	vector<int> sortvec;
+	// -----------------------
 
-// Timmer's opencv setup code
-namedWindow ( "Clusters");
-//namedWindow ("Time Surface Image");
+	// y1 is defined in another library, so must be defined locally
+	//  x, y, size, timeout
+	int x1, x2, y1, y2, subx, suby;
+
+	// Timmer's opencv setup code
+	namedWindow("Clusters");
+	// namedWindow ("Time Surface Image");
 
 // Install signal handler for global shutdown.
 #if defined(_WIN32)
@@ -141,6 +143,7 @@ namedWindow ( "Clusters");
 
 			//printf("Packet of type %d -> %d events, %d capacity.\n", packet->getEventType(), packet->getEventNumber(), packet->getEventCapacity());
 
+			// only process polarity spikes
 			if (packet->getEventType() == POLARITY_EVENT) {
 				std::shared_ptr<const libcaer::events::PolarityEventPacket> polarity
 					= std::static_pointer_cast<libcaer::events::PolarityEventPacket>(packet);
@@ -155,6 +158,7 @@ namedWindow ( "Clusters");
 					//printf("Event - ts: %d, x: %d, y: %d, pol: %d.\n", ts, x, y, pol);
 
 					//printf ("%d",ts_img.at<uchar>(x,y));
+					// go through each surrounding pixel and increment their values
 					for (int j = -1; j < 2; j++) {
 						for (int k = -1; k < 2; k++) {
 							xx = x + j;
@@ -166,6 +170,8 @@ namedWindow ( "Clusters");
 							ts_img.at<uchar>(yy,xx) += 2;
 						}
 					}
+
+					// Make an on spike affect surrounding pixels
 					//if (pol == 1) {
 					//	ts_img.at<uchar>(y,x) += 30;
 					//	ts_img.at<uchar>(y,x+1) += 30;
@@ -174,15 +180,15 @@ namedWindow ( "Clusters");
 					//	ts_img.at<uchar>(y-1,x) += 30;
 					//}
 					//else {
-					//	ts_img.at<uchar>(y,x) = 0;
+					//	ts_img.at<uchar>(y,x) = 0; // off spikes reset value
 					//}
 					not_in_a_cluster = true;
 					for (size_t i=0; i<5; i++) { // UPDATE CLUSTER that the spike belongs to
-						if ((x < clusters[i][0]+chs) && (x > clusters[i][0]-chs) && (y < clusters[i][1]+chs) &&(y > clusters[i][1]-chs)) {
+						if ((x < clusters[i][0]+chs) && (x > clusters[i][0]-chs) && (y < clusters[i][1]+chs) && (y > clusters[i][1]-chs)) {
 							not_in_a_cluster = false;
 							clusters[i][0] = 0.9*clusters[i][0] + 0.1*x;
 							clusters[i][1] = 0.9*clusters[i][1] + 0.1*y;
-							i = 6; // break out once you've processed the spike
+							i=6; // break out once you've processed the spike
 						}
 					}
 					if (not_in_a_cluster) { // SPAWN A NEW TRACKER
@@ -192,13 +198,14 @@ namedWindow ( "Clusters");
 									clusters[i][0] = x;  // if so, create new cluster
 									clusters[i][1] = y;
 									//printf ("spawned cluster %d\n",i);
-									i = 6; // acts to break out of the loop
+									i=6;
 								} // should we create new ones?
 							} //
 						}  // end for
 					} // end else
 				}
-				cntr++;
+
+				cntr++; // only do this every three spikes
 				if (cntr%3 == 0) {
 					cntr = 0;
 					// cluster management
@@ -212,6 +219,7 @@ namedWindow ( "Clusters");
 							if (x1 > 127) x1 = 127;
 							if (y1 > 127) y1 = 127;
 							Point p1 (x1, y1);
+
 							x2 = clusters[i][0] + chs;
 							y2 = clusters[i][1] + chs;
 							if (x2 < 0) x2 = 0;  // limit checking - should use 'sort'
@@ -219,8 +227,9 @@ namedWindow ( "Clusters");
 							if (x2 > 127) x2 = 127;
 							if (y2 > 127) y2 = 127;
 							Point p2 (x2, y2);
+							
 							sub_mat = ts_img(Rect(x1,y1,x2-x1,y2-y1)); // grab the cluster box
-							if (sum(sub_mat).val[0] <1500) {
+							if (sum(sub_mat).val[0] <1500) { // not enough activity in the box
 								clusters[i][0] = -100;  // kill the cluster for the next round
 								//printf ("killed cluster %d\n",i);
 							} // end if
@@ -232,7 +241,7 @@ namedWindow ( "Clusters");
 					imshow("Clusters",clust_img);
 					resizeWindow("Clusters", 200, 200); // bigger so that we can grab the top to move it.
 					waitKey(1);
-					ts_img *= 0.5;
+					ts_img *= 0.5; // exponential decay of ts
 				}
 			}
 		}
