@@ -1,34 +1,39 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Sets CMAKE_INSTALL_PREFIX so the later functions know where the modules folder is
-IF (UNIX AND NOT APPLE)
-    set(CMAKE_INSTALL_PREFIX /usr)
-ELSEIF(APPLE)
-    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "CMake default install prefix, set to /usr/local on macOS")
-ENDIF()
+set(CMAKE_C_STANDARD 11)
 
-project(dvs128 LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 17)
 
-# May need to change based on install path of DV. This is for Linux
-include(/usr/share/dv/dv-modules.cmake)
+find_package(dv 1.3.0 REQUIRED)
+set(DV_LIBRARIES dv::dvsdk)
 
-# USES CMAKE_INSTALL_PREFIX to find dv/modules for DV_MODULES
-# Also creates DV_LIBRARIES to link needed libraries
-DV_MODULE_SETUP()
 
-# Adds files as shared libraries, which DV uses once installed
-# Also need to link other DV libraries
-add_library(dvs128_MultiCluster SHARED dvs128_MultiCluster.cpp)
-target_link_libraries(dvs128_MultiCluster PRIVATE ${DV_LIBRARIES})
+find_package(libcaer)
+set(DV_LIBRARIES libcaer::caer)
 
-add_library(dvs128_On_Track SHARED dvs128_On_track.cpp)
-target_link_libraries(dvs128_On_Track PRIVATE ${DV_LIBRARIES})
+find_package(fmt 7.0.3 REQUIRED)
+set(DV_LIBRARIES ${DV_LIBRARIES} fmt::fmt)
 
-add_library(dvs128_OnOff_ts1 SHARED dvs128_OnOff_ts1.cpp)
-target_link_libraries(dvs128_OnOff_ts1 PRIVATE ${DV_LIBRARIES})
 
-add_library(dvs128_ts1 SHARED dvs128_ts1.cpp)
-target_link_libraries(dvs128_ts1 PRIVATE ${DV_LIBRARIES})
+set(BOOST_ROOT /opt/inivation/boost/)
+find_package(Boost 1.73 REQUIRED COMPONENTS filesystem)
+set(DV_LIBRARIES ${DV_LIBRARIES} Boost::boost Boost::filesystem)
 
-# Files must be in dv/modules folder for DV to see it
-install(TARGETS dvs128_MultiCluster dvs128_On_Track dvs128_OnOff_ts1 dvs128_ts1 DESTINATION ${DV_MODULES_DIR})
+find_package(OpenCV)
+set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
+
+include_directories(/usr/include
+                    /usr/include/opencv4)
+
+add_executable(dvs128_MultiCluster.exe dvs128_MultiCluster.cpp)
+
+target_link_libraries(dvs128_MultiCluster.exe PRIVATE ${DV_LIBRARIES})
+
+add_executable(dvs128_On_Track.exe dvs128_On_track.cpp)
+target_link_libraries(dvs128_On_Track.exe PRIVATE ${DV_LIBRARIES})
+
+add_executable(dvs128_OnOff_ts1.exe dvs128_OnOff_ts1.cpp)
+target_link_libraries(dvs128_OnOff_ts1.exe PRIVATE ${DV_LIBRARIES})
+
+add_executable(dvs128_ts1.exe dvs128_ts1.cpp)
+target_link_libraries(dvs128_ts1.exe PRIVATE ${DV_LIBRARIES})
