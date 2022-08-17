@@ -7,9 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(dv 1.3.0 REQUIRED)
 set(DV_LIBRARIES dv::dvsdk)
 
-
-find_package(libcaer)
-set(DV_LIBRARIES libcaer::caer)
+find_package(libcaer REQUIRED)
+set(DV_LIBRARIES ${DV_LIBRARIES} libcaer::caer)
 
 find_package(fmt 7.0.3 REQUIRED)
 set(DV_LIBRARIES ${DV_LIBRARIES} fmt::fmt)
@@ -22,8 +21,7 @@ set(DV_LIBRARIES ${DV_LIBRARIES} Boost::boost Boost::filesystem)
 find_package(OpenCV)
 set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 
-include_directories(/usr/include
-                    /usr/include/opencv4)
+include_directories(/usr/include)
 
 add_executable(dvs128_MultiCluster.exe dvs128_MultiCluster.cpp)
 
