@@ -19,8 +19,7 @@ int main(void) {
 
 	namedWindow("Time Surface Image");
 
-	Mat ts_img(128, 128, CV_8UC1, 1);
-	Mat resized;
+	Mat ts_img(480, 640, CV_8UC1, 1);
 
 	cout << "Enter path to file: " << endl;
 
@@ -36,7 +35,7 @@ int main(void) {
 	int64_t lastTimeStamp = -1;
 
 	// define a function for when the file reader encounters an event packet
-	handler.mEventHandler = [&ts_img, &resized, &lastTimeStamp](const dv::EventStore &nextEvent) {
+	handler.mEventHandler = [&ts_img, &lastTimeStamp](const dv::EventStore &nextEvent) {
 		if (nextEvent.isEmpty())
 			return;
 
@@ -67,11 +66,7 @@ int main(void) {
 				ts_img.at<uchar>(y, x) = 0;
 		}
 
-		// resize the matrix so that the display isn't just 128 x 128
-		resize(ts_img, resized, Size(256, 256));
-
-		imshow("Time Surface Image", resized);
-		resizeWindow("Time Surface Image", 256, 256);
+		imshow("Time Surface Image", ts_img);
 
 		// waitkey will pause program if passed a numbeer <= 0
 		if (timeElapsed >= 1000) 

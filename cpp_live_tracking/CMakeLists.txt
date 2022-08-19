@@ -22,4 +22,7 @@ set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 include_directories(/usr/include, /opt/inivation)
 
 add_executable(file_reading_test.exe file_reading_test.cpp)
+add_executable(dvxplorer_file_read.exe dvxplorer_file_read.cpp)
+
 target_link_libraries(file_reading_test.exe PRIVATE ${DV_LIBRARIES})
+target_link_libraries(dvxplorer_file_read.exe PRIVATE ${DV_LIBRARIES})
