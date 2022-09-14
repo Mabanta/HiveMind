@@ -93,6 +93,17 @@ int main(void) {
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageWidth / blurScale, imageHeight / blurScale, CV_64FC1, Scalar(0));
 
+	// configure log file for events
+	dv::io::MonoCameraWriter::Config config;
+	config.cameraName = "Xplorer";
+	config.enableEvents = true;
+	config.eventResolution = Size(imageWidth, imageHeight); 
+	dv::io::MonoCameraWriter eventLog("./event_log_001.aedat4", config);
+
+	// log file for clusters
+	ofstream clusterLog;
+	clusterLog.open("./cluster_log_001.csv");
+
 	// infinite loop as long as a shutdown signal is not sent
 	while (capture.isRunning()) {
 		auto eventsWrapper = capture.getNextEventBatch();
@@ -208,6 +219,17 @@ int main(void) {
 						cluster.updateVelocity(delayTime);
 						cluster.updateRadius(radiusShrink);
 					}
+
+					clusterLog << timeStamp << ": ";
+
+					// log cluster information to file
+					for (int i = 0; i < maxClusters; i++) {
+						if (i < clusters.size()) 
+							clusterLog << clusters.at(i);
+						else // create empty columns if no cluster exists
+							clusterLog << ",,,,,";
+					}
+					clusterLog << std::endl;
 				} // end cluster updates
 
 				// display update condition
@@ -229,7 +251,9 @@ int main(void) {
 					tsImg *= imgScaleFactor;
 				} //end image update
 			} // end event loop
-			
+				
+			// log events
+			eventLog.writeEvents(events);	
 		} // end check event store
 	} // end global shutdown loop
 
