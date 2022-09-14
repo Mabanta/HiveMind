@@ -19,7 +19,6 @@ https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html
 
 4. Next, setup DV with these commands:
 ```
-
 brew tap inivation/inivation
 
 brew install libcaer --with-libserialport --with-opencv
@@ -28,9 +27,16 @@ brew install dv-runtime
 ```
 
 
-5. Then, 'git checkout' to the cpp_live_tracking branch, go to from_prof_horiuchi/build, and run:
+5. Then, checkout to the cpp_live_tracking branch and go to from_prof_horiuchi/build directory.
 ```
+git checkout cpp_live_tracking
 
+cd from_prof_horiuchi
+
+cd build
+```
+7. Run
+```
 cmake ..
 
 cmake —-build .
