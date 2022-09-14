@@ -24,10 +24,3 @@ cmake ..
 cmake —build .
 
 4. You should see a .exe file that was created
-
-
-
-# Sign when you have Git Working!
-Matthew Lynch
-Daniel was here.
-Stefan Traska
