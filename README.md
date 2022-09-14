@@ -39,11 +39,15 @@ cmake —-build .
 6. You should see a .exe file that was created
 
 ## Running DV Python
-1. In your terminal, run
+1. In your terminal download DV Python library by running
 ```
 pip3 install dv
 ```
-2. In Hivemind directory terminal, run
+2. Then download open-cv library by running
+```
+pip3 install opencv-python
+```
+4. In Hivemind directory terminal, run
 ```
 Pyhton3 <filename>
 ```
