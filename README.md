@@ -8,20 +8,24 @@ Go to this link, download
 https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html
 
 2. Next, Setup DV with these commands:
+```console
 
 brew tap inivation/inivation
 
 brew install libcaer --with-libserialport --with-opencv
 
 brew install dv-runtime
+```
 
 
 
 3. Then, go to cpp_live_tracking branch, go to from_prof_horiuchi/build, and run:
+```console
 
 cmake ..
 
-cmake —build .
+cmake --build .
+```
 
 4. You should see a .exe file that was created
 
