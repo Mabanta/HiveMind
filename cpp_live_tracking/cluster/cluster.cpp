@@ -12,11 +12,12 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->id = globId++;
 }
 
-double Cluster::distance(unsigned int x, unsigned int y) {
-    return pow(pow(x - this->x, 2) + pow(y - this->y, 2), 0.5);
+int Cluster::distance(unsigned int x, unsigned int y) {
+    //return pow(pow(x - this->x, 2) + pow(y - this->y, 2), 0.5);
+    return std::max(abs((int)(x - this->x)), abs((int)(y - this->y)));
 }
 
-double Cluster::inRange(unsigned int x, unsigned int y) {
+bool Cluster::inRange(unsigned int x, unsigned int y) {
     return distance(x, y) < radius;
 }
 
@@ -29,12 +30,12 @@ bool Cluster::otherClusterRange(unsigned int x, unsigned int y) {
 }
 
 void Cluster::shift(unsigned int x, unsigned int y) {
-    this->x = (1 - alpha) * this->x + alpha * x;
-    this->y = (1 - alpha) * this->y + alpha * y;
+    this->x = (1 - this->alpha) * this->x + this->alpha * x;
+    this->y = (1 - this->alpha) * this->y + this->alpha * y;
 }
 
 void Cluster::contMomentum(int64_t eventT, int64_t prevT) {
-    x = vel_x * (eventT, - prevT);
+    x = vel_x * (eventT - prevT);
     y = vel_y * (eventT -  prevT);
 }
 
@@ -63,7 +64,7 @@ void Cluster::resetEvents() {
 }
 
 void Cluster::draw(cv::Mat img) {
-    cv::circle(img, cv::Point(x, y), radius, color);
+    cv::circle(img, cv::Point(y, x), radius, color);
 }
 
 // overloading outstream operator to print info in csv format

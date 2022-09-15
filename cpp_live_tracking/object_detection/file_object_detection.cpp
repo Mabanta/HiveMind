@@ -1,9 +1,11 @@
 #include "../cluster/cluster.hpp"
 
+#define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
+
 #include <dv-processing/core/core.hpp>
 #include <libcaercpp/devices/dvxplorer.hpp>
 #include <libcaercpp/devices/device.hpp>
-#include <dv-processing/io/mono_camera_writer.hpp>
+#include <dv-processing/io/mono_camera_recording.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -21,47 +23,6 @@ using namespace cv;
 
 int main(void) {
 
-	// Scale factors close to 1 mean accumulation for a long time
-    const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
-    const double imgScaleFactor = 0.4;
-
-	// Frame rate is used to control the display
-	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
-    const int frameRate = 100;
-    const int displayTime = 1000000 / frameRate;
-
-	// This controls how often certain costly procedures are performed, such as checking for new clusters
-    const int updateRate = 100;
-    const int delayTime = 1000000 / updateRate;
-
-	// This algorithm uses a "blur" to make it easier to detect a lot of events occurring in the same region
-	// The algorithm breaks the time surface into 20 x 20 regions and keeps track of how many events have occurred in each region
-	// The blur scale controls the size of each region
-    const int blurScale = 20;
-	// This controls how much each event contributes to the regions in the blurred time surface
-	// A higher number will make each region more sensitive to individual events
-    const double blurIncreaseFactor = 0.18;
-
-    const int maxClusters = 15; // This puts a limit on how many clusters can be formed
-    const double clusterInitThresh = 0.9; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
-    const int clusterSustainThresh = 18; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
-    const int clusterSustainTime = 40000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
-
-    const double radiusGrowth = 1.0008; // the rate of growth of a cluster when a nearby spike is found
-    const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
-
-	//This factor controls how sensitive a cluster is to location change based on new spikes
-	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-	const double alpha = 0.15;
-
-	// choice of colors
-	const int numColors = 8;
-    int colorIndex = 0;
-    const viz::Color colors[numColors] = {viz::Color::amethyst(), viz::Color::navy(),
-                                  viz::Color::orange(), viz::Color::red(),
-                                  viz::Color::yellow(), viz::Color::pink(),
-                                  viz::Color::lime(), viz::Color::cyan()};
-
     namedWindow("Tracker Image");
 
 	// initialize to negative values to signal needed update
@@ -69,38 +30,88 @@ int main(void) {
     int64_t nextTime = -1;
     int64_t nextFrame = -1;
     int64_t nextSustain = -1;
-	int64_t prevTime = -1;
+	  int64_t prevTime = -1;
 
     vector<Cluster> clusters = vector<Cluster>();
 
-	// create a capture object to read events from any DVS device connected
-	dv::io::CameraCapture capture("", dv::io::CameraCapture::CameraType::DVS);
+  	String filePath = "./summer_bees_video_2022_08_13.aedat4";
+  	auto reader = dv::io::MonoCameraRecording(filePath);
 
-	// retrieve the event resolution
-	std::optional<cv::Size> resolutionWrapper = capture.getEventResolution();
+    dv::io::DataReadHandler handler;
+  	int64_t lastTimeStamp = -1;
 
-	int imageWidth, imageHeight;
+	const int imageWidth = 640, imageHeight = 480;
+
+  // This algorithm uses a "blur" to make it easier to detect a lot of events occurring in the same region
+  // The algorithm breaks the time surface into 20 x 20 regions and keeps track of how many events have occurred in each region
+  // The blur scale controls the size of each region
+    const int blurScale = 20;
+  // This controls how much each event contributes to the regions in the blurred time surface
+  // A higher number will make each region more sensitive to individual events
 
 	// extract the width and height of the camera resolution
-	if (resolutionWrapper.has_value()) {
-		imageWidth = resolutionWrapper.value().width;
-		imageHeight = resolutionWrapper.value().height;
-	} else {
-		cerr << "Could not retrieve camera resolution" << std::endl;
-	}
 
 	// Initializes a screen - its grayscale but uses 3 channels so that clusters can be drawn on the screen in RGB
     Mat tsImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageWidth / blurScale, imageHeight / blurScale, CV_64FC1, Scalar(0));
 
-	// infinite loop as long as a shutdown signal is not sent
-	while (capture.isRunning()) {
-		auto eventsWrapper = capture.getNextEventBatch();
+	// define a function for when the file reader encounters an event packet
+  handler.mEventHandler = [&tsImg, &tsBlurred, &lastTimeStamp, &nextTime, &nextFrame, &nextSustain, &prevTime,
+    &clusters, &imageWidth, &imageHeight, &blurScale](const dv::EventStore &nextEvent) {
 
-		// if there have been events
-		if (eventsWrapper.has_value()) {
-			dv::EventStore events = eventsWrapper.value();
+      // Scale factors close to 1 mean accumulation for a long time
+        const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
+        const double imgScaleFactor = 0.4;
+
+    	// Frame rate is used to control the display
+    	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
+        const int frameRate = 100;
+        const int displayTime = 1000000 / frameRate;
+
+    	// This controls how often certain costly procedures are performed, such as checking for new clusters
+        const int updateRate = 300;
+        const int delayTime = 1000000 / updateRate;
+
+
+        const double blurIncreaseFactor = 0.18;
+
+        const int maxClusters = 15; // This puts a limit on how many clusters can be formed
+        const double clusterInitThresh = 0.97; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
+        const int clusterSustainThresh = 15; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
+        const int clusterSustainTime = 60000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
+
+        const double radiusGrowth = 1.0008; // the rate of growth of a cluster when a nearby spike is found
+        const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
+
+    	//This factor controls how sensitive a cluster is to location change based on new spikes
+    	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
+    	const double alpha = 0.2;
+
+    	// choice of colors
+    	const int numColors = 8;
+        int colorIndex = 0;
+        const viz::Color colors[numColors] = {viz::Color::amethyst(), viz::Color::navy(),
+                                      viz::Color::orange(), viz::Color::red(),
+                                      viz::Color::yellow(), viz::Color::pink(),
+                                      viz::Color::lime(), viz::Color::cyan()};
+
+
+
+		if (nextEvent.isEmpty())
+			return;
+
+		// make sure you get the first timestamp
+		if (lastTimeStamp < 0)
+			lastTimeStamp = nextEvent.getLowestTime();
+
+		// use total time elapsed from end of last packet to end of this one
+		// to determine the delay length
+		int64_t timeElapsed = nextEvent.getHighestTime() - lastTimeStamp;
+		lastTimeStamp = nextEvent.getHighestTime();
+
+		// extract the events from the EventStore
+		dv::cvector<dv::Event> events = nextEvent.toPacket().elements;
 
 			// loop through each event in the batch
 			for (int i = 0; i < events.size(); i++) {
@@ -216,8 +227,9 @@ int main(void) {
 					nextFrame += displayTime;
 
 					// copy of time surface matrix to draw clusters on
-					Mat trackImg(imageWidth, imageHeight, CV_8UC3, Scalar(1));
+					Mat trackImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 					tsImg.copyTo(trackImg);
+
 
 					// draw each cluster
 					for (Cluster cluster : clusters)
@@ -231,8 +243,10 @@ int main(void) {
 				} //end image update
 			} // end event loop
 
-		} // end check event store
-	} // end global shutdown loop
+	}; //End event handler function
+
+  reader.run(handler);
+  printf("End of recording.\n");
 
 	return 0;
 } // end main

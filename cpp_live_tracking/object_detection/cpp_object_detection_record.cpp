@@ -40,7 +40,7 @@ int main(void) {
 	// This controls how much each event contributes to the regions in the blurred time surface
 	// A higher number will make each region more sensitive to individual events
     const double blurIncreaseFactor = 0.18;
-	
+
     const int maxClusters = 15; // This puts a limit on how many clusters can be formed
     const double clusterInitThresh = 0.9; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
     const int clusterSustainThresh = 18; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
@@ -51,7 +51,7 @@ int main(void) {
 
 	//This factor controls how sensitive a cluster is to location change based on new spikes
 	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-	const double alpha = 0.15; 
+	const double alpha = 0.15;
 
 	// choice of colors
 	const int numColors = 8;
@@ -89,7 +89,7 @@ int main(void) {
 	}
 
 	// Initializes a screen - its grayscale but uses 3 channels so that clusters can be drawn on the screen in RGB
-    Mat tsImg(imageWidth, imageHeight, CV_8UC3, Scalar(1));
+    Mat tsImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageWidth / blurScale, imageHeight / blurScale, CV_64FC1, Scalar(0));
 
@@ -97,7 +97,7 @@ int main(void) {
 	dv::io::MonoCameraWriter::Config config;
 	config.cameraName = "Xplorer";
 	config.enableEvents = true;
-	config.eventResolution = Size(imageWidth, imageHeight); 
+	config.eventResolution = Size(imageWidth, imageHeight);
 	dv::io::MonoCameraWriter eventLog("./event_log_001.aedat4", config);
 
 	// log file for clusters
@@ -111,18 +111,18 @@ int main(void) {
 		// if there have been events
 		if (eventsWrapper.has_value()) {
 			dv::EventStore events = eventsWrapper.value();
-		
+
 			// loop through each event in the batch
 			for (int i = 0; i < events.size(); i++) {
 				dv::Event event = events.at(i);
 
-				int64_t timeStamp = event.timestamp(); 
+				int64_t timeStamp = event.timestamp();
 				uint16_t x = event.x();
 				uint16_t y = event.y();
 				bool pol = event.polarity();
-					
+
 				// set initial timestamps
-				if (prevTime < 0) 
+				if (prevTime < 0)
 					prevTime = timeStamp;
 
 				if (nextTime < 0)
@@ -137,12 +137,12 @@ int main(void) {
 				// only update on off spikes
 				if (!pol) {
 					// Updates the time surface - this is purely for visualization purposes at this point
-					tsImg.at<Vec3b>(x, y) = Vec3b(255, 255, 255);
+					tsImg.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
 					// Increases the value of the corresponding region in the blurred time surface
 					tsBlurred.at<double>(y / blurScale, x / blurScale) += blurIncreaseFactor;
 
 					// Finds the distance of the event from each existing cluster
-					vector<double> distances = vector<double>();
+					vector<int> distances = vector<int>();
 					for (Cluster cluster : clusters) {
 						distances.push_back(cluster.distance(x, y));
 						// continue movement based on velocity and time elapsed
@@ -150,7 +150,7 @@ int main(void) {
 					}
 
 					if (!clusters.empty()) {
-						// retrieve the closest cluster 
+						// retrieve the closest cluster
 						Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 						// If the event is inside the closest cluster, it updates the location of that cluster
@@ -158,7 +158,7 @@ int main(void) {
 							minCluster.shift(x, y);
 							minCluster.newEvent();
 						} // If there is an event very near but outside the cluster, increase the cluster's radius
-						else if (minCluster.borderRange(x, y)) 
+						else if (minCluster.borderRange(x, y))
 							minCluster.updateRadius(radiusGrowth);
 					}
 
@@ -175,7 +175,7 @@ int main(void) {
 				if (timeStamp > nextTime) {
 					nextTime += delayTime;
 
-					// check of clusters need to be deleted						
+					// check of clusters need to be deleted
 					if (timeStamp > nextSustain) {
 						nextSustain += clusterSustainTime;
 
@@ -224,7 +224,7 @@ int main(void) {
 
 					// log cluster information to file
 					for (int i = 0; i < maxClusters; i++) {
-						if (i < clusters.size()) 
+						if (i < clusters.size())
 							clusterLog << clusters.at(i);
 						else // create empty columns if no cluster exists
 							clusterLog << ",,,,,";
@@ -237,11 +237,11 @@ int main(void) {
 					nextFrame += displayTime;
 
 					// copy of time surface matrix to draw clusters on
-					Mat trackImg(imageWidth, imageHeight, CV_8UC3, Scalar(1));
+					Mat trackImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 					tsImg.copyTo(trackImg);
 
-					// draw each cluster 
-					for (Cluster cluster : clusters) 
+					// draw each cluster
+					for (Cluster cluster : clusters)
 						cluster.draw(trackImg);
 
 					imshow("Tracker Image", trackImg);
@@ -251,9 +251,9 @@ int main(void) {
 					tsImg *= imgScaleFactor;
 				} //end image update
 			} // end event loop
-				
+
 			// log events
-			eventLog.writeEvents(events);	
+			eventLog.writeEvents(events);
 		} // end check event store
 	} // end global shutdown loop
 
