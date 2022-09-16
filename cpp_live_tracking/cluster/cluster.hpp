@@ -2,21 +2,24 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <cstdlib>
+#include <tgmath.h>
 
 class Cluster {
-    private: 
+    private:
         static int globId;
-        int id;
-        unsigned int x, y, prev_x, prev_y, eventCount{0};
+        int id, side{0};
+        unsigned int eventCount{0};
+        double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
         cv::viz::Color color;
 
-    public: 
+    public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
 
         double distance(unsigned int x, unsigned int y);
 
-        double inRange(unsigned int x, unsigned int y);
+        bool inRange(unsigned int x, unsigned int y);
 
         bool borderRange(unsigned int x, unsigned int y);
 
@@ -34,6 +37,10 @@ class Cluster {
 
         void newEvent();
 
+        int getSide(int width);
+
+        int updateSide(int width);
+
         void resetEvents();
 
         void draw(cv::Mat img);
@@ -43,4 +50,3 @@ class Cluster {
         bool operator==(const Cluster& comp);
 
 };
-
