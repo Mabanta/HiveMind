@@ -63,17 +63,18 @@ int main(void) {
 
     namedWindow("Tracker Image");
 
-	// initialize to negative values to signal needed update
-	// all timestamps are 64-bit ints to avoid overflow/wraparound
-    int64_t nextTime = -1;
-    int64_t nextFrame = -1;
-    int64_t nextSustain = -1;
-	int64_t prevTime = -1;
-
     vector<Cluster> clusters = vector<Cluster>();
 
 	// create a capture object to read events from any DVS device connected
 	dv::io::CameraCapture capture("", dv::io::CameraCapture::CameraType::DVS);
+
+	// initialize to negative values to signal needed update
+	// all timestamps are 64-bit ints to avoid overflow/wraparound
+	std::chrono::steady_clock::now();
+    int64_t nextTime = capture.getTimestampOffset();
+    int64_t nextFrame = capture.getTimestampOffset();
+    int64_t nextSustain = capture.getTimestampOffset();
+	int64_t prevTime = capture.getTimestampOffset();
 
 	// retrieve the event resolution
 	std::optional<cv::Size> resolutionWrapper = capture.getEventResolution();
@@ -109,19 +110,6 @@ int main(void) {
 				uint16_t x = event.x();
 				uint16_t y = event.y();
 				bool pol = event.polarity();
-					
-				// set initial timestamps
-				if (prevTime < 0) 
-					prevTime = timeStamp;
-
-				if (nextTime < 0)
-					nextTime = timeStamp;
-
-				if (nextFrame < 0)
-					nextFrame = timeStamp;
-
-				if (nextSustain < 0)
-					nextSustain = timeStamp;
 
 				// only update on off spikes
 				if (!pol) {
