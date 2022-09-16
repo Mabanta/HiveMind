@@ -24,6 +24,7 @@ using namespace cv;
 int main(void) {
 
     namedWindow("Tracker Image");
+    //namedWindow("Blurred Image");
 
 	// initialize to negative values to signal needed update
 	// all timestamps are 64-bit ints to avoid overflow/wraparound
@@ -34,7 +35,8 @@ int main(void) {
 
     vector<Cluster> clusters = vector<Cluster>();
 
-  	String filePath = "./summer_bees_video_2022_08_13.aedat4";
+  	//String filePath = "./summer_bees_video_2022_08_13.aedat4";
+    String filePath = "./event_log_001.aedat4";
   	auto reader = dv::io::MonoCameraRecording(filePath);
 
     dv::io::DataReadHandler handler;
@@ -55,11 +57,13 @@ int main(void) {
 	// Initializes a screen - its grayscale but uses 3 channels so that clusters can be drawn on the screen in RGB
     Mat tsImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 	// Initializes the blurred time surface, used to control the creation of new clusters
-    Mat tsBlurred(imageWidth / blurScale, imageHeight / blurScale, CV_64FC1, Scalar(0));
+    Mat tsBlurred(imageHeight / blurScale, imageWidth / blurScale, CV_64FC1, Scalar(0));
+
+    int netCrossing = 0, totalCrossing = 0;
 
 	// define a function for when the file reader encounters an event packet
   handler.mEventHandler = [&tsImg, &tsBlurred, &lastTimeStamp, &nextTime, &nextFrame, &nextSustain, &prevTime,
-    &clusters, &imageWidth, &imageHeight, &blurScale, &colorIndex](const dv::EventStore &nextEvent) {
+    &clusters, &imageWidth, &imageHeight, &blurScale, &colorIndex, &netCrossing, &totalCrossing](const dv::EventStore &nextEvent) {
 
       // Scale factors close to 1 mean accumulation for a long time
         const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
@@ -67,28 +71,28 @@ int main(void) {
 
     	// Frame rate is used to control the display
     	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
-        const int frameRate = 300;
+        const int frameRate = 200;
         const int displayTime = 1000000 / frameRate;
 
     	// This controls how often certain costly procedures are performed, such as checking for new clusters
-        const int updateRate = 100;
+        const int updateRate = 150;
         const int delayTime = 1000000 / updateRate;
 
 
-        const double blurIncreaseFactor = 0.22;
+        const double blurIncreaseFactor = 0.2;
 
         const int maxClusters = 20; // This puts a limit on how many clusters can be formed
         const double clusterInitThresh = 0.9; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
         const int clusterSustainThresh = 18; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
-        const int clusterSustainTime = 40000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
+        const int clusterSustainTime = 35000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
 
-        const double radiusGrowth = 1.0003; // the rate of growth of a cluster when a nearby spike is found
+        const double radiusGrowth = 1.0007; // the rate of growth of a cluster when a nearby spike is found
         //const double radiusGrowth = 1;
         const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
     	//This factor controls how sensitive a cluster is to location change based on new spikes
     	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-    	const double alpha = 0.17;
+    	const double alpha = 0.1;
 
 
     	// choice of colors
@@ -202,7 +206,7 @@ int main(void) {
                            	// The region must be greater than the cluster initialization threshold
                            	// The region can't be inside an already existing cluster
                            	// There can't be more clusters than the max limit
-							if (tsBlurred.at<double>(i,j) > clusterInitThresh && clusters.size() < maxClusters) {
+							if (tsBlurred.at<double>(j,i) > clusterInitThresh && clusters.size() < maxClusters) {
 								bool alreadyAdded = false;
 
 								// check that it is not inside an already existing cluster
@@ -226,6 +230,14 @@ int main(void) {
 					for (int i = 0; i < clusters.size(); i ++) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
+
+            int newCrossing = clusters.at(i).updateSide(imageWidth);
+            if (newCrossing != 0) {
+              netCrossing -= newCrossing;
+              totalCrossing += abs(newCrossing);
+              cout << "Total Crossed: " << totalCrossing << endl;
+              cout << "Net Crossed: " << netCrossing << endl;
+            }
 					}
 				} // end cluster updates
 
@@ -237,12 +249,21 @@ int main(void) {
 					Mat trackImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 					tsImg.copyTo(trackImg);
 
+          cv::line(trackImg,cv::Point(imageWidth/2,0),cv::Point(imageWidth/2,imageHeight),viz::Color::red());
+
+          Mat resized;
+          //resize(tsBlurred, resized, Size(imageWidth, imageHeight));
 
 					// draw each cluster
-					for (Cluster cluster : clusters)
+					for (Cluster cluster : clusters) {
 						cluster.draw(trackImg);
+            //cluster.draw(resized);
+          }
 
-					imshow("Tracker Image", trackImg);
+
+          //imshow("Blurred Image",resized);
+          imshow("Tracker Image", trackImg);
+          //resizeWindow("Blurred Image", imageHeight, imageWidth);
 					waitKey(1);
 
 					// time surface exponential decay

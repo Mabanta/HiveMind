@@ -64,13 +64,32 @@ void Cluster::resetEvents() {
     eventCount = 0;
 }
 
+int Cluster::getSide(int width) {
+  if (x < (double)(width/2 - 10))
+    return -1;
+  else if (x > (double)(width/2 + 10))
+    return 1;
+  return 0;
+}
+
+int Cluster::updateSide(int width) {
+  int newSide = getSide(width);
+  if (newSide != side && newSide != 0) {
+    bool sideZero = (side == 0);
+    side = newSide;
+    if(!sideZero)
+      return side;
+  }
+  return 0;
+}
+
 void Cluster::draw(cv::Mat img) {
     cv::circle(img, cv::Point(x, y), radius, color);
 }
 
 // overloading outstream operator to print info in csv format
 std::ostream& operator<<(std::ostream& out, const Cluster& src) {
-    out << src.x << "," << src.y << "," << src.radius << "," << src.vel_x << "," << src.vel_y << ",";
+    out << src.x << "," << src.y << "," << src.radius << "," << src.vel_x << "," << src.vel_y << ", ";
     return out;
 }
 
