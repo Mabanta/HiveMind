@@ -1,4 +1,4 @@
-#include "../cluster/cluster.hpp"
+#include "./cluster/cluster.hpp"
 
 #include <dv-processing/core/core.hpp>
 #include <libcaercpp/devices/dvxplorer.hpp>
@@ -89,7 +89,7 @@ int main(void) {
 	}
 
 	// Initializes a screen - its grayscale but uses 3 channels so that clusters can be drawn on the screen in RGB
-    Mat tsImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
+    Mat tsImg(imageWidth, imageHeight, CV_8UC3, Scalar(1));
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageWidth / blurScale, imageHeight / blurScale, CV_64FC1, Scalar(0));
 
@@ -114,7 +114,7 @@ int main(void) {
 
 			// loop through each event in the batch
 			for (int i = 0; i < events.size(); i++) {
-				dv::Event event = events.at(i);
+        dv::Event event = events.at(i);
 
 				int64_t timeStamp = event.timestamp();
 				uint16_t x = event.x();
@@ -142,24 +142,28 @@ int main(void) {
 					tsBlurred.at<double>(y / blurScale, x / blurScale) += blurIncreaseFactor;
 
 					// Finds the distance of the event from each existing cluster
-					vector<int> distances = vector<int>();
-					for (Cluster cluster : clusters) {
-						distances.push_back(cluster.distance(x, y));
+					vector<double> distances = vector<double>();
+					for (int i = 0; i < clusters.size(); i++) {
+						distances.push_back(clusters.at(i).distance(x, y));
 						// continue movement based on velocity and time elapsed
-						cluster.contMomentum(timeStamp, prevTime);
+						clusters.at(i).contMomentum(timeStamp, prevTime);
 					}
 
 					if (!clusters.empty()) {
 						// retrieve the closest cluster
+            int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
 						Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 						// If the event is inside the closest cluster, it updates the location of that cluster
 						if (minCluster.inRange(x, y)) {
-							minCluster.shift(x, y);
-							minCluster.newEvent();
+							clusters.at(minDistance).shift(x, y);
+							clusters.at(minDistance).newEvent();
+
 						} // If there is an event very near but outside the cluster, increase the cluster's radius
-						else if (minCluster.borderRange(x, y))
-							minCluster.updateRadius(radiusGrowth);
+						else if (minCluster.borderRange(x, y)) {
+							clusters.at(minDistance).updateRadius(radiusGrowth);
+            }
+
 					}
 
 					prevTime = timeStamp;
@@ -179,12 +183,13 @@ int main(void) {
 					if (timeStamp > nextSustain) {
 						nextSustain += clusterSustainTime;
 
-						for (Cluster cluster : clusters) {
+						for (int i = 0; i < clusters.size(); i ++) {
 							// delete a cluster if it did not have enough events
+              Cluster cluster = clusters.at(i);
 							if (!cluster.aboveThreshold(clusterSustainThresh))
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							else // if it's above the threshold, reset the number of events
-								cluster.resetEvents();
+								clusters.at(i).resetEvents();
 						}
 					}
 
@@ -194,7 +199,7 @@ int main(void) {
                            	// The region must be greater than the cluster initialization threshold
                            	// The region can't be inside an already existing cluster
                            	// There can't be more clusters than the max limit
-							if (tsBlurred.at<double>(i, j) > clusterInitThresh && clusters.size() < maxClusters) {
+							if (tsBlurred.at<double>(i,j) > clusterInitThresh && clusters.size() < maxClusters) {
 								bool alreadyAdded = false;
 
 								// check that it is not inside an already existing cluster
@@ -215,9 +220,9 @@ int main(void) {
 					} // end blurred matrix loop
 
 					// update the velocity and shrink the radius
-					for (Cluster cluster : clusters) {
-						cluster.updateVelocity(delayTime);
-						cluster.updateRadius(radiusShrink);
+					for (int i = 0; i < clusters.size(); i ++) {
+						clusters.at(i).updateVelocity(delayTime);
+						clusters.at(i).updateRadius(radiusShrink);
 					}
 
 					clusterLog << timeStamp << ": ";
@@ -237,7 +242,7 @@ int main(void) {
 					nextFrame += displayTime;
 
 					// copy of time surface matrix to draw clusters on
-					Mat trackImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
+					Mat trackImg(imageWidth, imageHeight, CV_8UC3, Scalar(1));
 					tsImg.copyTo(trackImg);
 
 					// draw each cluster

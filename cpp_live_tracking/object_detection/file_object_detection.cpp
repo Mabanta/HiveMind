@@ -1,4 +1,4 @@
-#include "../cluster/cluster.hpp"
+#include "./cluster/cluster.hpp"
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
 
@@ -39,6 +39,7 @@ int main(void) {
 
     dv::io::DataReadHandler handler;
   	int64_t lastTimeStamp = -1;
+    int colorIndex = 0;
 
 	const int imageWidth = 640, imageHeight = 480;
 
@@ -58,40 +59,41 @@ int main(void) {
 
 	// define a function for when the file reader encounters an event packet
   handler.mEventHandler = [&tsImg, &tsBlurred, &lastTimeStamp, &nextTime, &nextFrame, &nextSustain, &prevTime,
-    &clusters, &imageWidth, &imageHeight, &blurScale](const dv::EventStore &nextEvent) {
+    &clusters, &imageWidth, &imageHeight, &blurScale, &colorIndex](const dv::EventStore &nextEvent) {
 
       // Scale factors close to 1 mean accumulation for a long time
         const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
-        const double imgScaleFactor = 0.4;
+        const double imgScaleFactor = 0.7;
 
     	// Frame rate is used to control the display
     	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
-        const int frameRate = 100;
+        const int frameRate = 300;
         const int displayTime = 1000000 / frameRate;
 
     	// This controls how often certain costly procedures are performed, such as checking for new clusters
-        const int updateRate = 300;
+        const int updateRate = 100;
         const int delayTime = 1000000 / updateRate;
 
 
-        const double blurIncreaseFactor = 0.18;
+        const double blurIncreaseFactor = 0.22;
 
-        const int maxClusters = 15; // This puts a limit on how many clusters can be formed
-        const double clusterInitThresh = 0.97; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
-        const int clusterSustainThresh = 15; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
-        const int clusterSustainTime = 60000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
+        const int maxClusters = 20; // This puts a limit on how many clusters can be formed
+        const double clusterInitThresh = 0.9; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
+        const int clusterSustainThresh = 18; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
+        const int clusterSustainTime = 40000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
 
-        const double radiusGrowth = 1.0008; // the rate of growth of a cluster when a nearby spike is found
+        const double radiusGrowth = 1.0003; // the rate of growth of a cluster when a nearby spike is found
+        //const double radiusGrowth = 1;
         const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
     	//This factor controls how sensitive a cluster is to location change based on new spikes
     	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-    	const double alpha = 0.2;
+    	const double alpha = 0.17;
+
 
     	// choice of colors
     	const int numColors = 8;
-        int colorIndex = 0;
-        const viz::Color colors[numColors] = {viz::Color::amethyst(), viz::Color::navy(),
+        const viz::Color colors[numColors] = {viz::Color::amethyst(), viz::Color::blue(),
                                       viz::Color::orange(), viz::Color::red(),
                                       viz::Color::yellow(), viz::Color::pink(),
                                       viz::Color::lime(), viz::Color::cyan()};
@@ -143,24 +145,28 @@ int main(void) {
 					tsBlurred.at<double>(y / blurScale, x / blurScale) += blurIncreaseFactor;
 
 					// Finds the distance of the event from each existing cluster
-					vector<int> distances = vector<int>();
-					for (Cluster cluster : clusters) {
-						distances.push_back(cluster.distance(x, y));
+					vector<double> distances = vector<double>();
+					for (int i = 0; i < clusters.size(); i++) {
+						distances.push_back(clusters.at(i).distance(x, y));
 						// continue movement based on velocity and time elapsed
-						cluster.contMomentum(timeStamp, prevTime);
+						clusters.at(i).contMomentum(timeStamp, prevTime);
 					}
 
 					if (!clusters.empty()) {
 						// retrieve the closest cluster
+            int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
 						Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 						// If the event is inside the closest cluster, it updates the location of that cluster
 						if (minCluster.inRange(x, y)) {
-							minCluster.shift(x, y);
-							minCluster.newEvent();
+							clusters.at(minDistance).shift(x, y);
+							clusters.at(minDistance).newEvent();
+
 						} // If there is an event very near but outside the cluster, increase the cluster's radius
-						else if (minCluster.borderRange(x, y))
-							minCluster.updateRadius(radiusGrowth);
+						else if (minCluster.borderRange(x, y)) {
+							clusters.at(minDistance).updateRadius(radiusGrowth);
+            }
+
 					}
 
 					prevTime = timeStamp;
@@ -180,12 +186,13 @@ int main(void) {
 					if (timeStamp > nextSustain) {
 						nextSustain += clusterSustainTime;
 
-						for (Cluster cluster : clusters) {
+						for (int i = 0; i < clusters.size(); i ++) {
 							// delete a cluster if it did not have enough events
+              Cluster cluster = clusters.at(i);
 							if (!cluster.aboveThreshold(clusterSustainThresh))
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							else // if it's above the threshold, reset the number of events
-								cluster.resetEvents();
+								clusters.at(i).resetEvents();
 						}
 					}
 
@@ -195,7 +202,7 @@ int main(void) {
                            	// The region must be greater than the cluster initialization threshold
                            	// The region can't be inside an already existing cluster
                            	// There can't be more clusters than the max limit
-							if (tsBlurred.at<double>(i, j) > clusterInitThresh && clusters.size() < maxClusters) {
+							if (tsBlurred.at<double>(i,j) > clusterInitThresh && clusters.size() < maxClusters) {
 								bool alreadyAdded = false;
 
 								// check that it is not inside an already existing cluster
@@ -216,9 +223,9 @@ int main(void) {
 					} // end blurred matrix loop
 
 					// update the velocity and shrink the radius
-					for (Cluster cluster : clusters) {
-						cluster.updateVelocity(delayTime);
-						cluster.updateRadius(radiusShrink);
+					for (int i = 0; i < clusters.size(); i ++) {
+						clusters.at(i).updateVelocity(delayTime);
+						clusters.at(i).updateRadius(radiusShrink);
 					}
 				} // end cluster updates
 

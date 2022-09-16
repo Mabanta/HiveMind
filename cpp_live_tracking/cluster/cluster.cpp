@@ -4,17 +4,17 @@ int Cluster::globId = 0;
 
 Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha) {
     this->alpha = alpha;
-    this->x = x;
-    this->y = y;
-    this->prev_x = x;
-    this->prev_y = y;
+    this->x = (double)x;
+    this->y = (double)y;
+    this->prev_x = (double)x;
+    this->prev_y = (double)y;
     this->color = color;
     this->id = globId++;
 }
 
-int Cluster::distance(unsigned int x, unsigned int y) {
+double Cluster::distance(unsigned int x, unsigned int y) {
     //return pow(pow(x - this->x, 2) + pow(y - this->y, 2), 0.5);
-    return std::max(abs((int)(x - this->x)), abs((int)(y - this->y)));
+    return std::max(fabs((double)x - this->x), fabs((double)y - this->y));
 }
 
 bool Cluster::inRange(unsigned int x, unsigned int y) {
@@ -30,21 +30,21 @@ bool Cluster::otherClusterRange(unsigned int x, unsigned int y) {
 }
 
 void Cluster::shift(unsigned int x, unsigned int y) {
-    this->x = (1 - this->alpha) * this->x + this->alpha * x;
-    this->y = (1 - this->alpha) * this->y + this->alpha * y;
+    this->x = (1 - alpha) * this->x + alpha * (double)x;
+    this->y = (1 - alpha) * this->y + alpha * (double)y;
 }
 
 void Cluster::contMomentum(int64_t eventT, int64_t prevT) {
-    x = vel_x * (eventT - prevT);
-    y = vel_y * (eventT -  prevT);
+    x = x + vel_x * (eventT - prevT);
+    y = y + vel_y * (eventT - prevT);
 }
 
 void Cluster::updateVelocity(unsigned int delay) {
-    vel_x = (x - prev_x) / delay;
-    vel_y = (y - prev_x) / delay;
+    vel_x = (x - prev_x) / (double)delay;
+    vel_y = (y - prev_y) / (double)delay;
 
-    x = prev_x;
-    y = prev_y;
+    prev_x = x;
+    prev_y = y;
 }
 
 void Cluster::updateRadius(float growthFactor) {
@@ -59,12 +59,13 @@ void Cluster::newEvent() {
     eventCount++;
 }
 
+
 void Cluster::resetEvents() {
     eventCount = 0;
 }
 
 void Cluster::draw(cv::Mat img) {
-    cv::circle(img, cv::Point(y, x), radius, color);
+    cv::circle(img, cv::Point(x, y), radius, color);
 }
 
 // overloading outstream operator to print info in csv format
