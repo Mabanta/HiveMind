@@ -48,7 +48,7 @@ void Cluster::updateVelocity(unsigned int delay) {
 }
 
 void Cluster::updateRadius(float growthFactor) {
-    radius *= growthFactor;
+    radius *= growthFactor * ((40-radius)/15);
 }
 
 bool Cluster::aboveThreshold(unsigned int threshold) {
