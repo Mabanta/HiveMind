@@ -113,9 +113,7 @@ from_prof_horiuchi/build/libdvs128_On_Track.so
 from_prof_horiuchi/build/libdvs128_OnOff_ts1.so
 from_prof_horiuchi/build/libdvs128_ts1.so
 .DS_Store
-=======
 
-*.exe
 *.so
 .vscode/tasks.json
 .vscode/settings.json
@@ -126,3 +124,5 @@ from_prof_horiuchi/build/libdvs128_ts1.so
 *cmake_install.cmake
 *CMakeFiles*
 *install_manifest.txt
+
+*/fftw-3**
