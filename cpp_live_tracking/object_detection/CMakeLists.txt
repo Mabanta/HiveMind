@@ -22,6 +22,18 @@ include_directories(/usr/include, /opt/inivation)
 link_directories(../cluster/build)
 
 add_executable(cpp_object_detection.exe cpp_object_detection.cpp)
+add_executable(cpp_object_detection_record.exe cpp_object_detection_record.cpp)
+add_executable(file_object_detection.exe file_object_detection.cpp)
+add_executable(cluster_visualize.exe cluster_visualize.cpp)
 
 target_link_libraries(cpp_object_detection.exe PRIVATE ${DV_LIBRARIES})
 target_link_libraries(cpp_object_detection.exe PRIVATE cluster)
+
+target_link_libraries(cpp_object_detection_record.exe PRIVATE ${DV_LIBRARIES})
+target_link_libraries(cpp_object_detection_record.exe PRIVATE cluster)
+
+target_link_libraries(file_object_detection.exe PRIVATE ${DV_LIBRARIES})
+target_link_libraries(file_object_detection.exe PRIVATE cluster)
+
+target_link_libraries(cluster_visualize.exe PRIVATE ${DV_LIBRARIES})
+target_link_libraries(cluster_visualize.exe PRIVATE cluster)
