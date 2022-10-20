@@ -1,4 +1,4 @@
-#include "./cluster/cluster.hpp"
+#include "../cluster/cluster.hpp"
 
 #include <dv-processing/core/core.hpp>
 #include <libcaercpp/devices/dvxplorer.hpp>
@@ -20,11 +20,11 @@ using namespace cv;
 
 int main(void) {
 
-  // Scale factors close to 1 mean accumulation for a long time
+  	// Scale factors close to 1 mean accumulation for a long time
     const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
 
 
-  // This controls how often certain costly procedures are performed, such as checking for new clusters
+  	// This controls how often certain costly procedures are performed, such as checking for new clusters
     const int updateRate = 150;
     const int delayTime = 1000000 / updateRate;
 
@@ -46,8 +46,8 @@ int main(void) {
     //const double radiusGrowth = 1;
     const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
-  //This factor controls how sensitive a cluster is to location change based on new spikes
-  //A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
+  	//This factor controls how sensitive a cluster is to location change based on new spikes
+  	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
   const double alpha = 0.1;
 
 
@@ -101,13 +101,13 @@ int main(void) {
 	// log file for clusters
 	ofstream clusterLog;
 	clusterLog.open("./cluster_log_001.csv");
-  clusterLog << "Timestamp, ";
-  clusterLog << "Total Crossed, ";
-  clusterLog << "Net Crossed, ";
-  for (int i = 0; i < maxClusters; i ++) {
-    clusterLog << "Cluster " << i << ", ";
-  }
-  clusterLog << std::endl;
+ 	 clusterLog << "Timestamp, ";
+  	clusterLog << "Total Crossed, ";
+  	clusterLog << "Net Crossed, ";
+  	for (int i = 0; i < maxClusters; i ++) {
+    	clusterLog << "Cluster " << i << ", ";
+  	}
+  	clusterLog << std::endl;
 
 	// infinite loop as long as a shutdown signal is not sent
 	while (capture.isRunning()) {
@@ -119,7 +119,7 @@ int main(void) {
 
 			// loop through each event in the batch
 			for (int i = 0; i < events.size(); i++) {
-        dv::Event event = events.at(i);
+        		dv::Event event = events.at(i);
 
 				int64_t timeStamp = event.timestamp();
 				uint16_t x = event.x();
@@ -155,7 +155,7 @@ int main(void) {
 
 					if (!clusters.empty()) {
 						// retrieve the closest cluster
-            int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
+            			int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
 						Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 						// If the event is inside the closest cluster, it updates the location of that cluster
@@ -166,7 +166,7 @@ int main(void) {
 						} // If there is an event very near but outside the cluster, increase the cluster's radius
 						else if (minCluster.borderRange(x, y)) {
 							clusters.at(minDistance).updateRadius(radiusGrowth);
-            }
+            			}
 
 					}
 
@@ -189,7 +189,7 @@ int main(void) {
 
 						for (int i = 0; i < clusters.size(); i ++) {
 							// delete a cluster if it did not have enough events
-              Cluster cluster = clusters.at(i);
+              				Cluster cluster = clusters.at(i);
 							if (!cluster.aboveThreshold(clusterSustainThresh))
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							else // if it's above the threshold, reset the number of events
@@ -228,18 +228,18 @@ int main(void) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
 
-            int newCrossing = clusters.at(i).updateSide(imageWidth);
-            if (newCrossing != 0) {
-              netCrossing -= newCrossing;
-              totalCrossing += abs(newCrossing);
-              cout << "Total Crossed: " << totalCrossing << endl;
-              cout << "Net Crossed: " << netCrossing << endl;
-            }
+            			int newCrossing = clusters.at(i).updateSide(imageWidth, imageHeight);
+            			if (newCrossing != 0) {
+              				netCrossing -= newCrossing;
+              				totalCrossing += abs(newCrossing);
+              				cout << "Total Crossed: " << totalCrossing << endl;
+              				cout << "Net Crossed: " << netCrossing << endl;
+            			}
 					}
 
 					clusterLog << timeStamp << ": ";
-          clusterLog << totalCrossing << ",";
-          clusterLog << netCrossing << ", ";
+          			clusterLog << totalCrossing << ",";
+          			clusterLog << netCrossing << ", ";
 
 					// log cluster information to file
 					for (int i = 0; i < maxClusters; i++) {

@@ -1,4 +1,4 @@
-#include "./cluster/cluster.hpp"
+#include "../cluster/cluster.hpp"
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
 
@@ -31,12 +31,12 @@ int main(void) {
     int64_t nextTime = -1;
     int64_t nextFrame = -1;
     int64_t nextSustain = -1;
-	  int64_t prevTime = -1;
+	int64_t prevTime = -1;
 
     vector<Cluster> clusters = vector<Cluster>();
 
   	//String filePath = "./summer_bees_video_2022_08_13.aedat4";
-    String filePath = "./event_log_001.aedat4";
+    String filePath = "./event_log_10_7_board.aedat4";
   	auto reader = dv::io::MonoCameraRecording(filePath);
 
     dv::io::DataReadHandler handler;
@@ -231,13 +231,13 @@ int main(void) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
 
-            int newCrossing = clusters.at(i).updateSide(imageWidth);
-            if (newCrossing != 0) {
-              netCrossing -= newCrossing;
-              totalCrossing += abs(newCrossing);
-              cout << "Total Crossed: " << totalCrossing << endl;
-              cout << "Net Crossed: " << netCrossing << endl;
-            }
+            			int newCrossing = clusters.at(i).updateSide(imageWidth, imageHeight);
+            			if (newCrossing != 0) {
+              				netCrossing -= newCrossing;
+              				totalCrossing += abs(newCrossing);
+              				cout << "Total Crossed: " << totalCrossing << endl;
+              				cout << "Net Crossed: " << netCrossing << endl;
+            			}
 					}
 				} // end cluster updates
 
@@ -249,21 +249,23 @@ int main(void) {
 					Mat trackImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 					tsImg.copyTo(trackImg);
 
-          cv::line(trackImg,cv::Point(imageWidth/2,0),cv::Point(imageWidth/2,imageHeight),viz::Color::red());
+          			cv::line(trackImg, cv::Point(imageWidth/2, imageHeight / 4), cv::Point(imageWidth/2, 3 * imageHeight / 4), viz::Color::red());
+					cv::line(trackImg, cv::Point(0, imageHeight / 4), cv::Point(imageWidth / 2, imageHeight / 4), viz::Color::red());
+					cv::line(trackImg, cv::Point(0, 3 * imageHeight / 4), cv::Point(imageWidth / 2, 3 * imageHeight / 4), viz::Color::red());
 
-          Mat resized;
-          //resize(tsBlurred, resized, Size(imageWidth, imageHeight));
+          			Mat resized;
+          			//resize(tsBlurred, resized, Size(imageWidth, imageHeight));
 
 					// draw each cluster
 					for (Cluster cluster : clusters) {
 						cluster.draw(trackImg);
-            //cluster.draw(resized);
-          }
+            			//cluster.draw(resized);
+          			}
 
 
-          //imshow("Blurred Image",resized);
-          imshow("Tracker Image", trackImg);
-          //resizeWindow("Blurred Image", imageHeight, imageWidth);
+          			//imshow("Blurred Image",resized);
+          			imshow("Tracker Image", trackImg);
+          			//resizeWindow("Blurred Image", imageHeight, imageWidth);
 					waitKey(1);
 
 					// time surface exponential decay

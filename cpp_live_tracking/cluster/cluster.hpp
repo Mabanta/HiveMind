@@ -37,6 +37,10 @@ class Cluster {
 
         void newEvent();
 
+        int getSide(int width, int height);
+
+        int updateSide(int , int height);
+
         int getSide(int width);
 
         int updateSide(int width);

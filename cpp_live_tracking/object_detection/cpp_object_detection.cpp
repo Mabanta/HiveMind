@@ -1,11 +1,11 @@
-#include "./cluster/cluster.hpp"
+#include "../cluster/cluster.hpp"
 
 #include <dv-processing/core/core.hpp>
 #include <libcaercpp/devices/dvxplorer.hpp>
 #include <libcaercpp/devices/device.hpp>
 #include <dv-processing/io/mono_camera_writer.hpp>
 
-#include <iostream>
+#include <iostream> 
 #include <fstream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -205,7 +205,7 @@ int main(void) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
 
-            int newCrossing = clusters.at(i).updateSide(imageWidth);
+            int newCrossing = clusters.at(i).updateSide(imageWidth, imageHeight);
             if (newCrossing != 0) {
               netCrossing -= newCrossing;
               totalCrossing += abs(newCrossing);
