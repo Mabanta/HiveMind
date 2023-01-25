@@ -12,6 +12,17 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->id = globId++;
 }
 
+Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
+    this->alpha = alpha;
+    this->x = (double)x;
+    this->y = (double)y;
+    this->prev_x = (double)x;
+    this->prev_y = (double)y;
+    this->color = NULL;
+    this->id = globId++;
+}
+
+
 double Cluster::distance(unsigned int x, unsigned int y) {
     //return pow(pow(x - this->x, 2) + pow(y - this->y, 2), 0.5);
     return std::max(fabs((double)x - this->x), fabs((double)y - this->y));

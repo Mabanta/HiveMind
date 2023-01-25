@@ -5,12 +5,11 @@
 #include <libcaercpp/devices/device.hpp>
 #include <dv-processing/io/mono_camera_writer.hpp>
 
-#include <iostream>
-#include <fstream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
+
 #include <atomic>
 #include <csignal>
 #include <chrono>
@@ -22,7 +21,7 @@ int main(void) {
 
   	// Scale factors close to 1 mean accumulation for a long time
     const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
-
+	const double imgScaleFactor = 0.7;
 
   	// This controls how often certain costly procedures are performed, such as checking for new clusters
     const int updateRate = 150;
@@ -31,7 +30,7 @@ int main(void) {
     // This algorithm uses a "blur" to make it easier to detect a lot of events occurring in the same region
     // The algorithm breaks the time surface into 20 x 20 regions and keeps track of how many events have occurred in each region
     // The blur scale controls the size of each region
-      const int blurScale = 20;
+    const int blurScale = 20;
     // This controls how much each event contributes to the regions in the blurred time surface
     // A higher number will make each region more sensitive to individual events
 
@@ -46,18 +45,9 @@ int main(void) {
     //const double radiusGrowth = 1;
     const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
-  	//This factor controls how sensitive a cluster is to location change based on new spikes
-  	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-  const double alpha = 0.1;
-
-
-	// choice of colors
-	const int numColors = 8;
-    int colorIndex = 0;
-    const viz::Color colors[numColors] = {viz::Color::amethyst(), viz::Color::navy(),
-                                  viz::Color::orange(), viz::Color::red(),
-                                  viz::Color::yellow(), viz::Color::pink(),
-                                  viz::Color::lime(), viz::Color::cyan()};
+  	// This factor controls how sensitive a cluster is to location change based on new spikes
+  	// A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
+	const double alpha = 0.1;
 
     //namedWindow("Tracker Image");
 
@@ -101,17 +91,19 @@ int main(void) {
 	// log file for clusters
 	ofstream clusterLog;
 	clusterLog.open("./cluster_log_001.csv");
- 	 clusterLog << "Timestamp, ";
+ 	clusterLog << "Timestamp, ";
   	clusterLog << "Total Crossed, ";
   	clusterLog << "Net Crossed, ";
+
   	for (int i = 0; i < maxClusters; i ++) {
     	clusterLog << "Cluster " << i << ", ";
   	}
+
   	clusterLog << std::endl;
 
 	// infinite loop as long as a shutdown signal is not sent
 	while (capture.isRunning()) {
-		auto eventsWrapper = capture.getNextEventBatch();
+		std::optional<dv::EventStore> eventsWrapper = capture.getNextEventBatch();
 
 		// if there have been events
 		if (eventsWrapper.has_value()) {
@@ -187,23 +179,25 @@ int main(void) {
 					if (timeStamp > nextSustain) {
 						nextSustain += clusterSustainTime;
 
-						for (int i = 0; i < clusters.size(); i ++) {
+						for (int i = 0; i < clusters.size(); i++) {
 							// delete a cluster if it did not have enough events
               				Cluster cluster = clusters.at(i);
-							if (!cluster.aboveThreshold(clusterSustainThresh))
-								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
-							else // if it's above the threshold, reset the number of events
+							if (!cluster.aboveThreshold(clusterSustainThresh)) {
+								clusters.erase(clusters.begin() + i);
+								i--;
+							} else {// if it's above the threshold, reset the number of events
 								clusters.at(i).resetEvents();
+							}
 						}
 					}
 
-					for (int i = 0; i < imageWidth / blurScale; i++) {
-						for (int j = 0; j < imageHeight / blurScale; j++) {
+					for (int i = 0; i < imageWidth / blurScale  && clusters.size() < maxClusters; i++) {
+						for (int j = 0; j < imageHeight / blurScale  && clusters.size() < maxClusters; j++) {
 							// Adds a new cluster if three criteria are met:
                            	// The region must be greater than the cluster initialization threshold
                            	// The region can't be inside an already existing cluster
                            	// There can't be more clusters than the max limit
-							if (tsBlurred.at<double>(j,i) > clusterInitThresh && clusters.size() < maxClusters) {
+							if (tsBlurred.at<double>(j,i) > clusterInitThresh) {
 								bool alreadyAdded = false;
 
 								// check that it is not inside an already existing cluster
@@ -215,7 +209,7 @@ int main(void) {
 
 								// create a new cluster if it doesn't already exist
 								if (!alreadyAdded) {
-									Cluster newCluster = Cluster(i * blurScale, j * blurScale, colors[colorIndex++ % numColors], alpha);
+									Cluster newCluster = Cluster(i * blurScale, j * blurScale, alpha);
 
 									clusters.push_back(newCluster);
 								}
