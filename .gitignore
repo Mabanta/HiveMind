@@ -1,4 +1,3 @@
-
 *.exe
 .vscode/tasks.json
 from_prof_horiuchi/build/CMakeFiles/cmake.check_cache
@@ -114,3 +113,16 @@ from_prof_horiuchi/build/libdvs128_On_Track.so
 from_prof_horiuchi/build/libdvs128_OnOff_ts1.so
 from_prof_horiuchi/build/libdvs128_ts1.so
 .DS_Store
+
+*.so
+.vscode/tasks.json
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+*Makefile
+*error.txt
+*CMakeCache.txt
+*cmake_install.cmake
+*CMakeFiles*
+*install_manifest.txt
+
+*/fftw-3**

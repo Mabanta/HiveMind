@@ -30,7 +30,6 @@ static void usbShutdownHandler(void *ptr) {
 
 int main(void) {
 
-// matrix holding the time surface
 Mat ts_img (128, 128, CV_8UC1, 1);
 int cntr = 0;
 
@@ -117,7 +116,6 @@ int cntr = 0;
 
 			//printf("Packet of type %d -> %d events, %d capacity.\n", packet->getEventType(), packet->getEventNumber(), packet->getEventCapacity());
 
-			// only process polarity spikes
 			if (packet->getEventType() == POLARITY_EVENT) {
 				std::shared_ptr<const libcaer::events::PolarityEventPacket> polarity
 					= std::static_pointer_cast<libcaer::events::PolarityEventPacket>(packet);
@@ -134,8 +132,6 @@ int cntr = 0;
 
 					//printf("Event - ts: %d, x: %d, y: %d, pol: %d.\n", ts, x, y, pol);
 					//printf ("%d",ts_img.at<uchar>(x,y));
-
-					// fully saturate if an on spike, or remove accumlation if an off spike
 					if (pol == 1) {
 						ts_img.at<uchar>(y,x) = 255;
 					}
@@ -144,14 +140,12 @@ int cntr = 0;
 					}
 				}
 				cntr++;
-
-				// update on every second packet
 				if (cntr%2 == 0) {
 					cntr = 0;
 					imshow("Time Surface Image",ts_img);
-				 	waitKey(1);
+				 waitKey(1);
 
-					ts_img = ts_img - 8; // linear decay for ts
+					ts_img = ts_img - 8;
 				}
 				//auto t2 = std::chrono::high_resolution_clock::now();
 				//std::cout << "f() took "
