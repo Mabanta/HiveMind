@@ -23,6 +23,7 @@ link_directories(./cluster/build)
 
 #add_executable(cpp_object_detection cpp_object_detection.cpp)
 add_executable(file_forced_osc file_forced_osc.cpp)
+add_executable(forced_osc_record cpp_forced_osc.cpp)
 #add_executable(object_record cpp_object_detection_record.cpp)
 #add_executable(cluster_visualize cluster_visualize.cpp)
 
@@ -31,6 +32,9 @@ add_executable(file_forced_osc file_forced_osc.cpp)
 
 target_link_libraries(file_forced_osc PRIVATE ${DV_LIBRARIES})
 target_link_libraries(file_forced_osc PRIVATE cluster)
+
+target_link_libraries(forced_osc_record PRIVATE ${DV_LIBRARIES})
+target_link_libraries(forced_osc_record PRIVATE cluster)
 
 #target_link_libraries(object_record PRIVATE ${DV_LIBRARIES})
 #target_link_libraries(object_record PRIVATE cluster)
