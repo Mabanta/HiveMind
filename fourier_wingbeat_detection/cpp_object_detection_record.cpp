@@ -91,11 +91,8 @@ int main(void) {
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageHeight / blurScale, imageWidth / blurScale, CV_64FC1, Scalar(0));
 
+	auto config = dv::io::MonoCameraWriter::EventOnlyConfig("Xplorer", Size(imageWidth, imageHeight));
 	// configure log file for events
-	dv::io::MonoCameraWriter::Config config;
-	config.cameraName = "Xplorer";
-	config.enableEvents = true;
-	config.eventResolution = Size(imageWidth, imageHeight);
 	dv::io::MonoCameraWriter eventLog("./event_log_beehive_9_25_no_board.aedat4", config);
 
 	// log file for clusters

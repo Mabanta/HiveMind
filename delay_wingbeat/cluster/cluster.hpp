@@ -4,19 +4,18 @@
 #include <opencv2/imgproc.hpp>
 #include <cstdlib>
 #include <tgmath.h>
+#include <dv-processing/core/core.hpp>
 
 class Cluster {
     private:
         static int globId;
-        int id, side{0};
-        unsigned int eventCount{0}, posIndex{0};
-        bool newFrequency{false};
+        int id, side{0}, transitionCount{0};
+        int64_t prevTime = -1;
+        int eventCount = 0;
+        float runningAvg{0.0}, running_sum{0.0};
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
-        int64_t startTime;
-        unsigned int num_oscillators{12};
-        int omega_min{190};
-        double A [12], phi [12], omega [12];
+        bool prevPol {true};
         cv::viz::Color color;
 
     public:
@@ -42,13 +41,13 @@ class Cluster {
 
         void newEvent();
 
+        void updateFreq(dv::Event);
+
         int getSide(int width);
 
         int updateSide(int width);
 
         void resetEvents();
-
-        void update_osc(int64_t timestamp, double time_constant);
 
         int getFrequency();
 

@@ -20,25 +20,25 @@ using namespace cv;
 
 int main(void) {
 
-  // Scale factors close to 1 mean accumulation for a long time
+	// Scale factors close to 1 mean accumulation for a long time
     const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
 
 
-    // This controls how often certain costly procedures are performed, such as checking for new clusters
-      const int updateRate = 150;
-      const int delayTime = 1000000 / updateRate;
+	// This controls how often certain costly procedures are performed, such as checking for new clusters
+	const int updateRate = 150;
+	const int delayTime = 1000000 / updateRate;
 
-      const int sampleFreq = 1000; //This is in Hertz
-      const int sampleTime = 1000000 / sampleFreq;
+	const int sampleFreq = 1000; //This is in Hertz
+	const int sampleTime = 1000000 / sampleFreq;
 
-      const int numPositions = 500; //This is the number of data points used to calculate the wing beat frequency
-      // A larger number means a more accurate frequency, but more time between frequency calculations
-      // numPositions / sampleFreq represents the time (in seconds) between frequency calculations
+	const int numPositions = 500; //This is the number of data points used to calculate the wing beat frequency
+	// A larger number means a more accurate frequency, but more time between frequency calculations
+	// numPositions / sampleFreq represents the time (in seconds) between frequency calculations
 
     // This algorithm uses a "blur" to make it easier to detect a lot of events occurring in the same region
     // The algorithm breaks the time surface into 20 x 20 regions and keeps track of how many events have occurred in each region
     // The blur scale controls the size of each region
-      const int blurScale = 20;
+	const int blurScale = 20;
     // This controls how much each event contributes to the regions in the blurred time surface
     // A higher number will make each region more sensitive to individual events
 
@@ -53,9 +53,9 @@ int main(void) {
     //const double radiusGrowth = 1;
     const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
-  //This factor controls how sensitive a cluster is to location change based on new spikes
-  //A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
-  const double alpha = 0.1;
+	//This factor controls how sensitive a cluster is to location change based on new spikes
+	//A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically
+	const double alpha = 0.1;
 
 
 	// choice of colors
@@ -72,7 +72,7 @@ int main(void) {
 	// all timestamps are 64-bit ints to avoid overflow/wraparound
     int64_t nextTime = -1;
     int64_t nextSustain = -1;
-	  int64_t prevTime = -1;
+	int64_t prevTime = -1;
     int64_t nextSample = -1;
 
     int netCrossing = 0, totalCrossing = 0;
@@ -98,23 +98,20 @@ int main(void) {
 	// Initializes the blurred time surface, used to control the creation of new clusters
     Mat tsBlurred(imageHeight / blurScale, imageWidth / blurScale, CV_64FC1, Scalar(0));
 
+	auto config = dv::io::MonoCameraWriter::EventOnlyConfig("Xplorer", Size(imageWidth, imageHeight));
 	// configure log file for events
-	dv::io::MonoCameraWriter::Config config;
-	config.cameraName = "Xplorer";
-	config.enableEvents = true;
-	config.eventResolution = Size(imageWidth, imageHeight);
 	dv::io::MonoCameraWriter eventLog("./event_log_10_12_freq_250ms_long.aedat4", config);
 
 	// log file for clusters
-	ofstream clusterLog;
+	std::ofstream clusterLog;
 	clusterLog.open("./cluster_log_10_12_freq_250ms_long.csv");
-  clusterLog << "Timestamp, ";
-  clusterLog << "Total Crossed, ";
-  clusterLog << "Net Crossed, ";
-  for (int i = 0; i < maxClusters; i ++) {
-    clusterLog << "Cluster " << i << ", ";
-  }
-  clusterLog << std::endl;
+	clusterLog << "Timestamp, ";
+	clusterLog << "Total Crossed, ";
+	clusterLog << "Net Crossed, ";
+	for (int i = 0; i < maxClusters; i ++) {
+		clusterLog << "Cluster " << i << ", ";
+	}
+	clusterLog << std::endl;
 
 	// infinite loop as long as a shutdown signal is not sent
 	while (capture.isRunning()) {
@@ -125,7 +122,7 @@ int main(void) {
 			dv::EventStore events = eventsWrapper.value();
 
 			// loop through each event in the batch
-      for (int i = 0; i < events.size(); i++) {
+			for (int i = 0; i < events.size(); i++) {
 				dv::Event event = events.at(i);
 
 				int64_t timeStamp = event.timestamp();
@@ -143,15 +140,15 @@ int main(void) {
 				if (nextSustain < 0)
 					nextSustain = timeStamp;
 
-        if (nextSample < 0)
-          nextSample = timeStamp;
+				if (nextSample < 0)
+					nextSample = timeStamp;
 
 
 				// only update on off spikes
 				if (!pol) {
 					// Increases the value of the corresponding region in the blurred time surface
 					tsBlurred.at<double>(y / blurScale, x / blurScale) += blurIncreaseFactor;
-        }
+				}
 
 				// Finds the distance of the event from each existing cluster
 				vector<double> distances = vector<double>();
@@ -160,11 +157,11 @@ int main(void) {
 					// continue movement based on velocity and time elapsed
 					if (!pol) clusters.at(i).contMomentum(timeStamp, prevTime);
 				}
-        if (!pol) prevTime = timeStamp;
+				if (!pol) prevTime = timeStamp;
 
 				if (!clusters.empty()) {
 					// retrieve the closest cluster
-          int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
+					int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
 					Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 					// If the event is inside the closest cluster, it updates the location of that cluster
@@ -175,7 +172,7 @@ int main(void) {
 					} // If there is an event very near but outside the cluster, increase the cluster's radius
 					else if (minCluster.borderRange(x, y)) {
 						if (!pol) clusters.at(minDistance).updateRadius(radiusGrowth);
-          }
+					}
 
 				}
 
@@ -195,7 +192,7 @@ int main(void) {
 
 						for (int i = 0; i < clusters.size(); i ++) {
 							// delete a cluster if it did not have enough events
-              Cluster cluster = clusters.at(i);
+							Cluster cluster = clusters.at(i);
 							if (!cluster.aboveThreshold(clusterSustainThresh))
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							else // if it's above the threshold, reset the number of events
@@ -234,21 +231,22 @@ int main(void) {
 					for (int i = 0; i < clusters.size(); i ++) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
+						
+						int newCrossing = clusters.at(i).updateSide(imageWidth);
 
-            int newCrossing = clusters.at(i).updateSide(imageWidth);
-            if (newCrossing != 0) {
-              netCrossing -= newCrossing;
-              totalCrossing += abs(newCrossing);
-              cout << "Total Crossed: " << totalCrossing << endl;
-              cout << "Net Crossed: " << netCrossing << endl;
-            }
+						if (newCrossing != 0) {
+							netCrossing -= newCrossing;
+							totalCrossing += abs(newCrossing);
+							cout << "Total Crossed: " << totalCrossing << endl;
+							cout << "Net Crossed: " << netCrossing << endl;
+						}
 					}
+					
+					clusterLog << timeStamp << ": ";
+					clusterLog << totalCrossing << ",";
+					clusterLog << netCrossing << ", ";
 
-          clusterLog << timeStamp << ": ";
-          clusterLog << totalCrossing << ",";
-          clusterLog << netCrossing << ", ";
-
-          // log cluster information to file
+					// log cluster information to file
 					for (int i = 0; i < maxClusters; i++) {
 						if (i < clusters.size())
 							clusterLog << clusters.at(i);
@@ -256,23 +254,24 @@ int main(void) {
 							clusterLog << ",,,,,";
 					}
 					clusterLog << std::endl;
-
-          for (int i = 0; i < clusters.size(); i ++) {
-            double freq = clusters.at(i).getFrequency();
-            if (freq != - 1) {
-              cout << "Cluster Frequency:  " << freq << " Hz" << endl;
-            }
-          }
+					
+					for (int i = 0; i < clusters.size(); i ++) {
+						double freq = clusters.at(i).getFrequency();
+						
+						if (freq != - 1) {
+							cout << "Cluster Frequency:  " << freq << " Hz" << endl;
+						}
+					}
 
 
 				} // end cluster updates
-
-        if (timeStamp > nextSample) {
-          nextSample += sampleTime;
-          for (int i = 0; i < clusters.size(); i++) {
-            clusters.at(i).addHistory();
-          }
-        }
+				
+				if (timeStamp > nextSample) {
+					nextSample += sampleTime;
+					for (int i = 0; i < clusters.size(); i++) {
+						clusters.at(i).addHistory();
+					}
+				}
 
 			} // end event loop
 

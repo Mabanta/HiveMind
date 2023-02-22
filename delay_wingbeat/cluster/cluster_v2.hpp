@@ -2,22 +2,22 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <cstdlib>
 #include <tgmath.h>
+#include <dv-processing/core/core.hpp>
+#include <tuple>
 
 class Cluster {
     private:
-        static int globId;
+        static long globId;
         int id, side{0};
-        unsigned int eventCount{0}, posIndex{0};
-        bool newFrequency{false};
+        int64_t prevTime = -1;
+        int eventCount = 0;
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
-        int64_t startTime;
-        unsigned int num_oscillators{12};
-        int omega_min{190};
-        double A [12], phi [12], omega [12];
         cv::viz::Color color;
+        std::tuple<bool, int64_t, double, int> pixels[7][7];
 
     public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time);
@@ -42,17 +42,17 @@ class Cluster {
 
         void newEvent();
 
+        void updateFreq(dv::Event);
+
         int getSide(int width);
 
         int updateSide(int width);
 
         void resetEvents();
 
-        void update_osc(int64_t timestamp, double time_constant);
-
         int getFrequency();
 
-        int getID();
+        long getID();
 
         void draw(cv::Mat img);
 

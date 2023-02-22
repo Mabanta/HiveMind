@@ -90,7 +90,7 @@ int main(void) {
     //const double radiusGrowth = 1;
     const double radiusShrink = 0.998; // the rate of shrinkage of a cluster each time it is updated
 
-    const double time_constant = 5*3.14159;
+    const double time_constant = 0.1*3.14159;
 
   //This factor controls how sensitive a cluster is to location change based on new spikes
   //A higher value will cause the cluster to adapt more quickly, but it will also move more sporadically

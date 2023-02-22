@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(fileRead LANGUAGES C CXX)
 
-find_package(dv 1.3.0 REQUIRED)
-set(DV_LIBRARIES dv::dvsdk)
+find_package(dv 1.5.0 REQUIRED)
+set(DV_LIBRARIES dv)
 
 find_package(libcaer REQUIRED)
 set(DV_LIBRARIES ${DV_LIBRARIES} libcaer::caer)
