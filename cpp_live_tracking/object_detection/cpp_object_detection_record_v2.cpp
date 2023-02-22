@@ -96,10 +96,7 @@ int main(void) {
 	Mat tsImg(imageHeight, imageWidth, CV_8UC3, Scalar(1));
 
 	// configure log file for events
-	dv::io::MonoCameraWriter::Config config;
-	config.cameraName = "Xplorer";
-	config.enableEvents = true;
-	config.eventResolution = Size(imageWidth, imageHeight);
+	auto config = dv::io::MonoCameraWriter::EventOnlyConfig("Xplorer", Size(imageWidth, imageHeight));
 	dv::io::MonoCameraWriter eventLog("./event_log_001.aedat4", config);
 
 	// log file for clusters
