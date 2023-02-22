@@ -91,10 +91,7 @@ int main(void) {
     Mat tsBlurred(imageHeight / blurScale, imageWidth / blurScale, CV_64FC1, Scalar(0));
 
 	// configure log file for events
-	dv::io::MonoCameraWriter::Config config;
-	config.cameraName = "Xplorer";
-	config.enableEvents = true;
-	config.eventResolution = Size(imageWidth, imageHeight);
+	auto config = dv::io::MonoCameraWriter::EventOnlyConfig("Xplorer", Size(imageWidth, imageHeight));
   //string dvsLogName;
   //cout << "Enter name for DVS Log: ";
   //cin >> dvsLogName;
