@@ -5,7 +5,7 @@ project(cluster LANGUAGES C CXX)
 find_package(OpenCV)
 
 find_package(dv 1.5.0 REQUIRED)
-set(DV_LIBRARIES dv)
+set(DV_LIBRARIES dv::sdk)
 
 include_directories(/usr/include)
 

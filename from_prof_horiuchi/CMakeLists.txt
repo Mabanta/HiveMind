@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(dv 1.3.0 REQUIRED)
-set(DV_LIBRARIES dv::dvsdk)
+set(DV_LIBRARIES dv::sdk)
 
 find_package(libcaer REQUIRED)
 set(DV_LIBRARIES ${DV_LIBRARIES} libcaer::caer)
