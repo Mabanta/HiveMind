@@ -21,7 +21,7 @@ set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 include_directories(/usr/include, /opt/inivation)
 link_directories(../cluster/build)
 
-add_executable(cpp_object_detection.exe cpp_object_detection.cpp)
+add_executable(cpp_object_detection cpp_object_detection.cpp)
 
-target_link_libraries(cpp_object_detection.exe PRIVATE ${DV_LIBRARIES})
-target_link_libraries(cpp_object_detection.exe PRIVATE cluster)
+target_link_libraries(cpp_object_detection PRIVATE ${DV_LIBRARIES})
+target_link_libraries(cpp_object_detection PRIVATE cluster)
