@@ -111,10 +111,7 @@ int main(void) {
 
     int beesEntering = 0, beesLeaving = 0;
 
-    dv::io::MonoCameraWriter::Config config;
-  	config.cameraName = "Xplorer";
-  	config.enableEvents = true;
-  	config.eventResolution = Size(imageWidth, imageHeight);
+    auto config = dv::io::MonoCameraWriter::EventOnlyConfig("Xplorer", Size(imageWidth, imageHeight));
     //string dvsLogName;
     //cout << "Enter name for DVS Log: ";
     //cin >> dvsLogName;
