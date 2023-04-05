@@ -35,3 +35,13 @@ add_executable(file_center_delay_detection file_center_delay_detection.cpp)
 
 target_link_libraries(file_center_delay_detection PRIVATE ${DV_LIBRARIES})
 target_link_libraries(file_center_delay_detection PRIVATE cluster_v3)
+
+add_executable(file_indiv_delay_detection file_indiv_delay_detection.cpp)
+
+target_link_libraries(file_indiv_delay_detection PRIVATE ${DV_LIBRARIES})
+target_link_libraries(file_indiv_delay_detection PRIVATE cluster_v4)
+
+add_executable(file_heatmap_record file_heatmap_record.cpp)
+
+target_link_libraries(file_heatmap_record PRIVATE ${DV_LIBRARIES})
+target_link_libraries(file_heatmap_record PRIVATE heatmap_cluster)
