@@ -21,7 +21,7 @@
 using namespace std;
 using namespace cv;
 
-int main(void) {
+int main(int argc, char* argv[]) {
 
     namedWindow("Tracker Image");
     //namedWindow("Blurred Image");
@@ -37,6 +37,11 @@ int main(void) {
 
   	//String filePath = "./summer_bees_video_2022_08_13.aedat4";
     String filePath = "./event_log_10_7_board.aedat4";
+    if(argc > 1)
+    {
+    	filePath = argv[1];
+    }
+    
   	auto reader = dv::io::MonoCameraRecording(filePath);
 
     dv::io::DataReadHandler handler;
