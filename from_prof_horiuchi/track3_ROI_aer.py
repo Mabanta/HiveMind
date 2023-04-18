@@ -51,6 +51,7 @@ with AedatFile('./LeftFast.aedat4') as f:
             start_flag = True
         t_us = e.timestamp - start_us
         if (t_us > begin_us):
+            # Require a certain spike frequency before processing spikes
             if t_us - nfilter[e.y+1, e.x+1] < n_t_thresh: # NOISE FILTER
                 if (e.polarity == 1):  # ON spikes
                     zz = 0#ts[int(e.y),int(e.x)] = 1.0
