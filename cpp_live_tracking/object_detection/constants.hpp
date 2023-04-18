@@ -10,7 +10,7 @@ namespace constants
 	// Frame rate is used to control the display
 	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
  
-	inline constexpr int frameRate { 100 };
+	inline constexpr int frameRate { 200 };
 	inline constexpr int displayTime = { 1000000 / frameRate };
 
 	// This controls how often certain costly procedures are performed, such as checking for new clusters
