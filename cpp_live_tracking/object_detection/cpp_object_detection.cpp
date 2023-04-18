@@ -6,12 +6,13 @@
 #include <libcaercpp/devices/device.hpp>
 #include <dv-processing/io/mono_camera_writer.hpp>
 
-#include <iostream> 
-#include <fstream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
+
+#include <iostream> 
+#include <fstream>
 #include <atomic>
 #include <csignal>
 #include <chrono>
@@ -23,9 +24,9 @@ int main(int argc, char* argv[])
 	const int numColors = 8;
 	int colorIndex = 0;
 	const cv::viz::Color colors[numColors] = {cv::viz::Color::amethyst(), cv::viz::Color::navy(),
-                                  cv::viz::Color::orange(), cv::viz::Color::red(),
-                                  cv::viz::Color::yellow(), cv::viz::Color::pink(),
-                                  cv::viz::Color::lime(), cv::viz::Color::cyan()};
+                                	cv::viz::Color::orange(), cv::viz::Color::red(),
+									cv::viz::Color::yellow(), cv::viz::Color::pink(),
+									cv::viz::Color::lime(), cv::viz::Color::cyan()};
 
 	cv::namedWindow("Tracker Image");
 
