@@ -19,18 +19,27 @@
 #include <chrono>
 #include <cstdlib>
 
-using namespace std;
-using namespace cv;
-
 int main(int argc, char* argv[])
 {
-	namedWindow("Tracker Image");
+	cv::namedWindow("Tracker Image");
 
-  	//String filePath = "./summer_bees_video_2022_08_13.aedat4";
 	std::string filePath = "./event_log_10_7_board.aedat4";
-	if(argc > 1)
+
+	// Obtain filePath from command line
+	if (argc == 1)
+	{
+		std::cout << "No additional command line arguments give." << std::endl;
+		std::cout << "Defaulting to path: " << filePath << std::endl;
+		std::cout << "To specifiy the file path at runtime, use: ./file_object_detection.exe <path-to-aedat4>" << std::endl;
+	}
+	else if (argc > 1)
 	{
 		filePath = argv[1];
+		std::cout << "Found specified path: " << filePath << std::endl;
+		if (argc > 2)
+		{
+			std::cout << "Additional command line arguments found but not used..." << std::endl;
+		}
 	}
     
   	auto reader = dv::io::MonoCameraRecording(filePath);
