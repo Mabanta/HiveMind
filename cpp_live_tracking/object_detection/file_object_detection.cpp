@@ -45,7 +45,8 @@ int main(int argc, char* argv[])
   	auto reader = dv::io::MonoCameraRecording(filePath);
 	dv::io::DataReadHandler handler;
   	
-	const int imageWidth = 640, imageHeight = 480;
+	const int imageWidth = 640;
+	const int imageHeight = 480;
 
 	// Initializes a screen - its grayscale but uses 3 channels so that clusters can be drawn on the screen in RGB
 	cv::Mat tsImg(imageHeight, imageWidth, CV_8UC3, cv::Scalar(1));
@@ -222,8 +223,8 @@ int main(int argc, char* argv[])
 	           			{
 	              			netCrossing -= newCrossing;
 	              			totalCrossing += abs(newCrossing);
-	              			std::cout << "Total Crossed: " << totalCrossing << std::endl;
-	              			std::cout << "Net Crossed: " << netCrossing << std::endl;
+	              			std::cout << "Total Crossed: " << totalCrossing << "\t Net Crossed: " << netCrossing << "\r";
+	              			std::cout.flush();
 	            		}
 				}
 			}
