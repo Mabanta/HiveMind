@@ -271,8 +271,8 @@ int main(int argc, char* argv[])
               				netCrossing -= newCrossing;
               				totalCrossing++;
 
-              				std::cout << "Total Crossed: " << totalCrossing << std::endl;
-              				std::cout << "Net Crossed: " << netCrossing << std::endl;
+              				std::cout << "Total Crossed: " << totalCrossing << "\t Net Crossed: " << netCrossing << "\r";
+	              			std::cout.flush();
             			}
 					}
 					clusterLog << timeStamp << ": ";
