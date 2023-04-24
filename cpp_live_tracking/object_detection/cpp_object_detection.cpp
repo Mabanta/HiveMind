@@ -37,10 +37,9 @@ int main(int argc, char* argv[])
 
 	// initialize to negative values to signal needed update
 	// all timestamps are 64-bit ints to avoid overflow/wraparound
-	std::chrono::steady_clock::now();
-	int64_t nextTime = capture.getTimestampOffset();
-	int64_t nextFrame = capture.getTimestampOffset();
-	int64_t nextSustain = capture.getTimestampOffset();
+    int64_t nextTime = capture.getTimestampOffset();
+    int64_t nextFrame = capture.getTimestampOffset();
+    int64_t nextSustain = capture.getTimestampOffset();
 	int64_t prevTime = capture.getTimestampOffset();
 
 	// retrieve the event resolution
