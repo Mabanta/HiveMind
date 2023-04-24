@@ -19,7 +19,7 @@ find_package(OpenCV)
 set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 
 include_directories(/usr/include, /opt/inivation)
-find_library(cluster HINTS ../cluster ../cluster/build)
+link_directories(../cluster/build)
 
 add_executable(cpp_object_detection.exe cpp_object_detection.cpp)
 add_executable(cpp_object_detection_record.exe cpp_object_detection_record.cpp)
