@@ -99,9 +99,9 @@ void Cluster::update_osc(int64_t timestamp, double time_constant) {
     double A_i  = exp(time_constant*t_i);
 
     for (int w = 0; w < num_oscillators; w ++) {
-      double phi_i = 2*pi*omega[w]*t_i + pi/2;
-      A[w] = sqrt(A[w]*A[w]+A_i*A_i+2*A[w]*A_i*cos(phi[w]-phi_i));
-      phi[w] = atan((A[w]*sin(phi[w])+A_i*sin(phi_i))/(A[w]*cos(phi[w])+A_i*cos(phi_i)));
+      double phi_i = 2*pi*omega[w]*t_i + pi/2; // Phi_i is phase shift of event relative to oscillator
+      A[w] = sqrt(A[w]*A[w]+A_i*A_i+2*A[w]*A_i*cos(phi[w]-phi_i)); // A[w] is amplitude of oscillator 
+      phi[w] = atan((A[w]*sin(phi[w])+A_i*sin(phi_i))/(A[w]*cos(phi[w])+A_i*cos(phi_i))); // phi[w] is phase shift of oscillator
     }
 }
 
@@ -117,6 +117,10 @@ int Cluster::getFrequency() {
 
     if (max > 0) return omega[maxFreq];
     return -1;
+}
+
+double* Cluster::getSpectrum() {
+  return &A[0];
 }
 
 int Cluster::getID() {

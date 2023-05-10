@@ -52,6 +52,8 @@ class Cluster {
 
         int getFrequency();
 
+        double* getSpectrum();
+
         int getID();
 
         void draw(cv::Mat img);
