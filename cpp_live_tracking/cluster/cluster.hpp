@@ -17,6 +17,8 @@ class Cluster {
     public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
 
+        Cluster(unsigned int x, unsigned int y, float alpha);
+
         double distance(unsigned int x, unsigned int y);
 
         bool inRange(unsigned int x, unsigned int y);
@@ -36,6 +38,10 @@ class Cluster {
         bool aboveThreshold(unsigned int threshold);
 
         void newEvent();
+
+        int getSide(int width, int height);
+
+        int updateSide(int , int height);
 
         int getSide(int width);
 
