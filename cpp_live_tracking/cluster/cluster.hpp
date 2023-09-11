@@ -9,15 +9,14 @@ class Cluster {
     private:
         static int globId;
         int id, side{0};
-        unsigned int eventCount{0};
+        unsigned int eventCount{0}, posIndex{0};
+        bool newFrequency{false};
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
         cv::viz::Color color;
 
     public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
-
-        Cluster(unsigned int x, unsigned int y, float alpha);
 
         double distance(unsigned int x, unsigned int y);
 
@@ -41,11 +40,7 @@ class Cluster {
 
         int getSide(int width, int height);
 
-        int updateSide(int , int height);
-
-        int getSide(int width);
-
-        int updateSide(int width);
+        int updateSide(int width, int height);
 
         void resetEvents();
 
