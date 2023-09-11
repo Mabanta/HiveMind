@@ -18,7 +18,7 @@ Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
     this->y = (double)y;
     this->prev_x = (double)x;
     this->prev_y = (double)y;
-    this->color = NULL;
+    this->color = cv::viz::Color::red();
     this->id = globId++;
 }
 
