@@ -77,9 +77,9 @@ void Cluster::resetEvents() {
 
 int Cluster::getSide(int width, int height) {
     if (x < (double)(width/2 - 10) && y > (double)(height / 4 + 10) && y < (double)(3 * height / 4 - 10))
-        return -1;
-    else if (x > (double)(width/2 + 10) || y < (double)(height / 4 - 10) || y > (double)(3 * height / 4 + 10))
         return 1;
+    else if (x > (double)(width/2 + 10) || y < (double)(height / 4 - 10) || y > (double)(3 * height / 4 + 10))
+        return -1;
     return 0;
 }
 

@@ -1,4 +1,4 @@
-#include "../cluster/cluster.hpp"
+#include <cluster/cluster.hpp>
 #include "constants.hpp"
 
 #include <dv-processing/core/core.hpp>

@@ -18,7 +18,7 @@ set(DV_LIBRARIES ${DV_LIBRARIES} Boost::boost Boost::filesystem)
 find_package(OpenCV)
 set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 
-include_directories(/usr/include, /opt/inivation)
+include_directories(/usr/include, /opt/inivation, ..)
 link_directories(../cluster/build)
 
 add_executable(cpp_object_detection.exe cpp_object_detection.cpp)

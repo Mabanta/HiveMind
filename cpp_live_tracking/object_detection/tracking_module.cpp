@@ -132,6 +132,10 @@ void BeeTrackingModule::run() {
 				// copy of time surface matrix to draw clusters on
 				cv::Mat trackImg(imageHeight, imageWidth, CV_8UC3, cv::Scalar(1));
 				tsImg.copyTo(trackImg);
+
+				cv::line(trackImg, cv::Point(imageWidth/2, imageHeight / 4), cv::Point(imageWidth/2, 3 * imageHeight / 4), cv::viz::Color::red());
+				cv::line(trackImg, cv::Point(imageWidth, imageHeight / 4), cv::Point(imageWidth / 2, imageHeight / 4), cv::viz::Color::red());
+				cv::line(trackImg, cv::Point(imageWidth, 3 * imageHeight / 4), cv::Point(imageWidth / 2, 3 * imageHeight / 4), cv::viz::Color::red());
 				// draw each cluster
 				for (Cluster cluster : clusters) {
 					cluster.draw(trackImg);

@@ -1,6 +1,6 @@
 // based on https://gitlab.com/inivation/dv/dv-processing/-/blob/rel_1.5/samples/io/aedat4-player.cpp
 
-#include "../cluster/cluster.hpp"
+#include <cluster/cluster.hpp>
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
 

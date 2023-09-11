@@ -1,4 +1,4 @@
-#include "../cluster/cluster.hpp"
+#include <cluster/cluster.hpp>
 #include "constants.hpp"
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
