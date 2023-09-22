@@ -12,17 +12,6 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->id = globId++;
 }
 
-Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
-    this->alpha = alpha;
-    this->x = (double)x;
-    this->y = (double)y;
-    this->prev_x = (double)x;
-    this->prev_y = (double)y;
-    this->color = cv::viz::Color::red();
-    this->id = globId++;
-}
-
-
 double Cluster::distance(unsigned int x, unsigned int y) {
     //return pow(pow(x - this->x, 2) + pow(y - this->y, 2), 0.5);
     return std::max(fabs((double)x - this->x), fabs((double)y - this->y));
@@ -76,36 +65,28 @@ void Cluster::resetEvents() {
 }
 
 int Cluster::getSide(int width, int height) {
-    if (x < (double)(width/2 - 10) && y > (double)(height / 4 + 10) && y < (double)(3 * height / 4 - 10))
-        return -1;
-    else if (x > (double)(width/2 + 10) || y < (double)(height / 4 - 10) || y > (double)(3 * height / 4 + 10))
-        return 1;
-    return 0;
-}
 
-int Cluster::updateSide(int width, int height) {
-    int newSide = getSide(width, height);
-    
-    if (newSide != side && newSide != 0) {
-        bool sideZero = (side == 0);
-        side = newSide;
-        if(!sideZero)
-            return side;
-    }
+  double leftSide = (double)(width*0.4);
+  double rightSide = (double)(width*0.9);
+  double top = (double)(height*0.85);
+  double bottom = (double)(height*0.15);
 
-    return 0;
-}
+  if (x > (leftSide + 5) && x < (rightSide - 5) && y > (bottom + 5) && y < (top - 5))
+    return 1;
+  else if ((x < (leftSide - 5) || x > (rightSide + 5)) || (y < (bottom - 5) || y > (top + 5)))
+    return -1;
+  return 0;
 
-int Cluster::getSide(int width) {
+  /*
   if (x < (double)(width/2 - 10))
     return -1;
   else if (x > (double)(width/2 + 10))
     return 1;
-  return 0;
+  return 0;*/
 }
 
-int Cluster::updateSide(int width) {
-  int newSide = getSide(width);
+int Cluster::updateSide(int width, int height) {
+  int newSide = getSide(width, height);
   if (newSide != side && newSide != 0) {
     bool sideZero = (side == 0);
     side = newSide;
