@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 								// create a new cluster if it doesn't already exist
 								if (!alreadyAdded)
 								{
-									Cluster newCluster = Cluster(i * constants::blurScale, j * constants::blurScale, constants::alpha);
+									Cluster newCluster = Cluster(i * constants::blurScale, j * constants::blurScale, cv::viz::Color::orange(), constants::alpha);
 									clusters.push_back(newCluster);
 								}
 							}
