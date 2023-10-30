@@ -42,13 +42,22 @@ int main(int argc, char* argv[])
 
 	std::ofstream timeLog;
 	timeLog.open("time_log.csv");
-	auto start = std::chrono::system_clock::now();
-	auto lastLog = std::chrono::system_clock::now();
-	std::chrono::minutes logPeriod(5);
+	// auto start = std::chrono::system_clock::now();
+	// auto lastLog = std::chrono::system_clock::now();
+	// std::chrono::minutes logPeriod(5);
 
-	timeLog << std::chrono::duration_cast<std::chrono::minutes> (std::chrono::system_clock::now() - start).count() << std::endl;
+	// timeLog << std::chrono::duration_cast<std::chrono::minutes> (std::chrono::system_clock::now() - start).count() << std::endl;
+	timeLog << "Timestamp, ";
+  	timeLog << "Total Crossed, ";
+  	timeLog << "Net Crossed, ";
+
+  	for (int i = 0; i < constants::maxClusters; i++)
+  	{
+    	timeLog << "Cluster " << i << ", ";
+  	}
+
+  	timeLog << std::endl;
     
-	while (true) {
   	auto reader = dv::io::MonoCameraRecording(filePath);
 	dv::io::DataReadHandler handler;
   	
@@ -78,7 +87,7 @@ int main(int argc, char* argv[])
 	// define a function for when the file reader encounters an event packet
 	handler.mEventHandler = [&tsImg, &tsBlurred, &lastTimeStamp, &nextTime, &nextFrame, &nextSustain, &prevTime,
 					&clusters, &imageWidth, &imageHeight, /* &constants::blurScale, */ &colorIndex, &netCrossing, &totalCrossing,
-					&start, &lastLog, &timeLog](const dv::EventStore &nextEvent)
+					/*&start, &lastLog, */ &timeLog](const dv::EventStore &nextEvent)
 	{
 
 	    	// choice of colors
@@ -235,6 +244,23 @@ int main(int argc, char* argv[])
 	              			std::cout.flush();
 	            		}
 				}
+				timeLog << timeStamp << ", ";
+				timeLog << totalCrossing << ", ";
+				timeLog << netCrossing << ", ";
+
+				// log cluster information to file
+				for (int i = 0; i < constants::maxClusters; i++) 
+				{
+					if (i < clusters.size())
+					{
+						timeLog << clusters.at(i);
+					}
+					else // create empty columns if no cluster exists
+					{
+						timeLog << ",,,,,";
+					}
+				}
+				timeLog << std::endl;
 			}
 			// display update condition
 			if (timeStamp > nextFrame)
@@ -244,14 +270,14 @@ int main(int argc, char* argv[])
 				tsImg *= constants::imgScaleFactor;
 			}
 
-			if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::system_clock::now() - lastLog).count() > 5) {
-				timeLog << std::chrono::duration_cast<std::chrono::minutes> (std::chrono::system_clock::now() - start).count() << std::endl;
-			}
+			// if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::system_clock::now() - lastLog).count() > 5) {
+			// 	timeLog << std::chrono::duration_cast<std::chrono::minutes> (std::chrono::system_clock::now() - start).count() << std::endl;
+			// }
+
 		}
 	};
 
 	reader.run(handler);
-	}
 	printf("End of recording.\n");
 	return 0;
 }
