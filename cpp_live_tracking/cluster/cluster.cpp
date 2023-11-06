@@ -67,8 +67,8 @@ void Cluster::resetEvents() {
 int Cluster::getSide(int width, int height) {
 
   double leftSide = (double)(width*0.4);
-  double rightSide = (double)(width*0.9);
-  double top = (double)(height*0.85);
+  double rightSide = (double)(width*0.95);
+  double top = (double)(height*0.67);
   double bottom = (double)(height*0.15);
 
   if (x > (leftSide + 5) && x < (rightSide - 5) && y > (bottom + 5) && y < (top - 5))
@@ -98,6 +98,19 @@ int Cluster::updateSide(int width, int height) {
 
 void Cluster::draw(cv::Mat img) {
     cv::circle(img, cv::Point(x, y), radius, color);
+}
+
+float Cluster::getRadius() {
+  return radius;
+}
+int Cluster::getX() {
+  return x;
+}
+int Cluster::getY() {
+  return y;
+}
+int Cluster::getID() {
+  return id;
 }
 
 // overloading outstream operator to print info in csv format
