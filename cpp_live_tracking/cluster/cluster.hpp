@@ -18,6 +18,8 @@ class Cluster {
     public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
 
+        Cluster(unsigned int x, unsigned int y, float alpha);
+
         double distance(unsigned int x, unsigned int y);
 
         bool inRange(unsigned int x, unsigned int y);
