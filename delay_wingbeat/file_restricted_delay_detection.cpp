@@ -36,7 +36,7 @@ int main(void) {
 
     vector<Cluster> clusters = vector<Cluster>();
 
-  	String filePath = "../08_13_bee_recording_3.aedat4";
+  	String filePath = "../10_12_freq_250ms.aedat4";
     //String filePath = "./event_log_001.aedat4";
   	auto reader = dv::io::MonoCameraRecording(filePath);
 
@@ -181,6 +181,7 @@ int main(void) {
 					// If the event is inside the closest cluster, it updates the location of that cluster
 					if (minCluster.inRange(x, y)) {
 						if (!pol) 
+							clusters.at(minDistance).newEvent();
 							clusters.at(minDistance).shift(x, y);
 						clusters.at(minDistance).updateFreq(event);
 
@@ -247,22 +248,13 @@ int main(void) {
 					for (int i = 0; i < clusters.size(); i ++) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
-						double freq = clusters.at(i).getFrequency();
+						int freq = clusters.at(i).getFrequency();
 
 						if (freq != - 1) {
 							std::cout << "Cluster " << clusters.at(i).getID() << " Frequency:  " << freq << " Hz" << endl;
 						}
 
 						int newCrossing = clusters.at(i).updateSide(imageWidth);
-            /*if (newCrossing == 1) {
-              beesLeaving ++;
-              cout << "Bees Leaving: " << beesLeaving << endl;
-              cout << "Total Crossing: " << (beesEntering + beesLeaving);
-            } else if (newCrossing == -1) {
-              beesEntering ++;
-              cout << "Bees Entering: " << beesEntering << endl;
-              cout << "Total Crossing: " << (beesEntering + beesLeaving);
-            }*/
 					}
 
 

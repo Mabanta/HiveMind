@@ -91,7 +91,7 @@ void Cluster::updateFreq(dv::Event event) {
         }
 
         if (prevTime > 0) {
-            runningAvg = (15 * runningAvg + (event.timestamp() - prevTime)) / 16;
+            runningAvg = (7 * runningAvg + (event.timestamp() - prevTime)) / 8;
         }
 
         prevTime = event.timestamp();
@@ -99,6 +99,8 @@ void Cluster::updateFreq(dv::Event event) {
     }
 
     pixels[surfaceX][surfaceY] = std::make_tuple(event.polarity(), prevTime, runningAvg, transitionCount);
+
+    newFreq();
 }
 
 
@@ -129,26 +131,43 @@ void Cluster::draw(cv::Mat img) {
     cv::circle(img, cv::Point(x, y), radius, color);
 }
 
-int Cluster::getFrequency() {
+void Cluster::newFreq() {
     double sum = 0.0;
     int total = 0;
+    int newFrequency = -1;
+
+    std::vector<float> averages = std::vector<float>();
 
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < 7; j++) {
             auto pixelData = pixels[i][j];
 
-            if (std::get<3>(pixelData) >= 16) {
-                sum += std::get<2>(pixelData);
-                total++;
+            if (std::get<3>(pixelData) >= 8) {
+                //sum += std::get<2>(pixelData);
+                //total++;
+                averages.push_back(std::get<2>(pixelData));
             }
         }
     }
 
-    if (total > 0) {
-        return 1000000 / (sum / total);
+    std::sort(averages.begin(), averages.end());
+
+    if (averages.size() > 0) {
+        float median;
+
+        if (averages.size() % 2 != 0)
+            median = averages.at(averages.size() / 2);
+        else 
+            median = (averages.at(averages.size() / 2 - 1) + averages.at(averages.size() / 2)) / 2;
+
+        newFrequency = 1000000 / median;
     }
 
-    return -1;
+    freq = newFrequency;
+}
+
+int Cluster::getFrequency() const {
+    return freq / 2;
 }
 
 long Cluster::getID() {
@@ -157,7 +176,7 @@ long Cluster::getID() {
 
 // overloading outstream operator to print info in csv format
 std::ostream& operator<<(std::ostream& out, const Cluster& src) {
-    out << src.x << "," << src.y << "," << src.radius << "," << src.vel_x << "," << src.vel_y << ", ";
+    out << src.x << "," << src.y << "," << src.radius << "," << src.vel_x << "," << src.vel_y << ", " << src.freq << ",";
     return out;
 }
 

@@ -160,7 +160,7 @@ int main(void) {
 					tsImg.at<Vec3b>(y,x) = Vec3b(255, 255, 255);
 					// Increases the value of the corresponding region in the blurred time surface
 					tsBlurred.at<double>(y / blurScale, x / blurScale) += blurIncreaseFactor;
-        }
+        		}
 
 				// Finds the distance of the event from each existing cluster
 				vector<double> distances = vector<double>();
@@ -169,11 +169,11 @@ int main(void) {
 					// continue movement based on velocity and time elapsed
 					if (!pol) clusters.at(i).contMomentum(timeStamp, prevTime);
 				}
-        if (!pol) prevTime = timeStamp;
+        		if (!pol) prevTime = timeStamp;
 
 				if (!clusters.empty()) {
 					// retrieve the closest cluster
-          int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
+          			int minDistance = distance(begin(distances), min_element(begin(distances), end(distances)));
 					Cluster minCluster = clusters.at(distance(begin(distances), min_element(begin(distances), end(distances))));
 
 					// If the event is inside the closest cluster, it updates the location of that cluster
@@ -184,7 +184,7 @@ int main(void) {
 					} // If there is an event very near but outside the cluster, increase the cluster's radius
 					else if (minCluster.borderRange(x, y)) {
 						if (!pol) clusters.at(minDistance).updateRadius(radiusGrowth);
-          }
+          			}
 
 				}
 
@@ -204,7 +204,7 @@ int main(void) {
 
 						for (int i = 0; i < clusters.size(); i ++) {
 							// delete a cluster if it did not have enough events
-              Cluster cluster = clusters.at(i);
+              				Cluster cluster = clusters.at(i);
 							if (!cluster.aboveThreshold(clusterSustainThresh))
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							else // if it's above the threshold, reset the number of events
@@ -243,10 +243,10 @@ int main(void) {
 					for (int i = 0; i < clusters.size(); i ++) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
-            double freq = clusters.at(i).getFrequency();
-            if (freq != - 1) {
-              cout << "Cluster " << clusters.at(i).getID() << " Frequency:  " << freq << " Hz" << endl;
-            }
+            			double freq = clusters.at(i).getFrequency();
+            			if (freq != - 1) {
+              				cout << "Cluster " << clusters.at(i).getID() << " Frequency:  " << freq << " Hz" << endl;
+            			}
 
             int newCrossing = clusters.at(i).updateSide(imageWidth);
             /*if (newCrossing == 1) {

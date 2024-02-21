@@ -7,17 +7,21 @@
 #include <tgmath.h>
 #include <dv-processing/core/core.hpp>
 #include <tuple>
+#include <vector>
+#include <algorithm>
 
 class Cluster {
     private:
         static long globId;
-        int id, side{0};
+        long id;
         int64_t prevTime = -1;
-        int eventCount = 0;
+        int eventCount{0}, side{0}, freq{-1};
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
         cv::viz::Color color;
         std::tuple<bool, int64_t, double, int> pixels[7][7];
+
+        void newFreq();
 
     public:
         Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time);
@@ -50,7 +54,7 @@ class Cluster {
 
         void resetEvents();
 
-        int getFrequency();
+        int getFrequency() const;
 
         long getID();
 

@@ -247,7 +247,7 @@ int main(void) {
 					for (int i = 0; i < clusters.size(); i ++) {
 						clusters.at(i).updateVelocity(delayTime);
 						clusters.at(i).updateRadius(radiusShrink);
-						double freq = clusters.at(i).getFrequency();
+						int freq = clusters.at(i).getFrequency();
 
 						if (freq != - 1) {
 							std::cout << "Cluster " << clusters.at(i).getID() << " Frequency:  " << freq << " Hz" << endl;

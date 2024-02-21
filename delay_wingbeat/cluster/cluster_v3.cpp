@@ -82,7 +82,7 @@ void Cluster::updateFreq(dv::Event event) {
         }
 
         if (prevTime > 0) {
-            runningAvg = (15 * runningAvg + (event.timestamp() - prevTime)) / 16;
+            runningAvg = (7 * runningAvg + (event.timestamp() - prevTime)) / 8;
         }
 
         prevTime = event.timestamp();
@@ -122,8 +122,8 @@ void Cluster::draw(cv::Mat img) {
 
 int Cluster::getFrequency() {
     
-    if (std::get<3>(blurredPixel) >= 16 && std::get<2>(blurredPixel) > 0) {
-        return 1000000 / std::get<2>(blurredPixel);
+    if (std::get<3>(blurredPixel) >= 8 && std::get<2>(blurredPixel) > 0) {
+        return 1000000 / std::get<2>(blurredPixel) / 2;
     }
 
     return -1;
