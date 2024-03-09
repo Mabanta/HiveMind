@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
 					{
 						// delete a cluster if it did not have enough events
 						Cluster cluster = clusters.at(i);
-						if (!cluster.aboveThreshold(constants::clusterSustainThresh))
+						if (!cluster.aboveThreshold(constants::clusterSustainThresh, imageWidth, imageHeight))
 						{
 							clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 						}
@@ -236,9 +236,10 @@ int main(int argc, char* argv[])
 				cv::Mat trackImg(imageHeight, imageWidth, CV_8UC3, cv::Scalar(1));
 				tsImg.copyTo(trackImg);
 
-	          		cv::line(trackImg, cv::Point(imageWidth/2, imageHeight / 4), cv::Point(imageWidth/2, 3 * imageHeight / 4), cv::viz::Color::red());
-				cv::line(trackImg, cv::Point(0, imageHeight / 4), cv::Point(imageWidth / 2, imageHeight / 4), cv::viz::Color::red());
-				cv::line(trackImg, cv::Point(0, 3 * imageHeight / 4), cv::Point(imageWidth / 2, 3 * imageHeight / 4), cv::viz::Color::red());
+	          		cv::rectangle(trackImg, cv::Point(imageWidth*0.4, imageHeight*0.15), cv::Point(imageWidth*0.9, imageHeight*0.85), cv::viz::Color::red());
+				cv::rectangle(trackImg, cv::Point(imageWidth*0.4 + 5, imageHeight*0.15 + 5), cv::Point(imageWidth*0.9 - 5, imageHeight*0.85 - 5), cv::viz::Color::blue());
+	          	cv::rectangle(trackImg, cv::Point(imageWidth*0.4 - 5, imageHeight*0.15 - 5), cv::Point(imageWidth*0.9 + 5, imageHeight*0.85 + 5), cv::viz::Color::blue());
+
 				cv::Mat resized;
 	          		//resize(tsBlurred, resized, Size(imageWidth, imageHeight));
 				// draw each cluster

@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 						{
 							// delete a cluster if it did not have enough events
 							Cluster cluster = clusters.at(i);
-							if (!cluster.aboveThreshold(constants::clusterSustainThresh))
+							if (!cluster.aboveThreshold(constants::clusterSustainThresh, imageWidth, imageHeight))
 							{
 								clusters.erase(remove(clusters.begin(), clusters.end(), cluster), clusters.end());
 							}

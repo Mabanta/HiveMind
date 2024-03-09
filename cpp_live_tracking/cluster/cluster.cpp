@@ -66,6 +66,10 @@ bool Cluster::aboveThreshold(unsigned int threshold) {
     return eventCount >= threshold;
 }
 
+bool Cluster::aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height) {
+    return eventCount >= threshold && x >= 0 && y >= 0 && x <= width && y <= height;
+}
+
 void Cluster::newEvent() {
     eventCount++;
 }

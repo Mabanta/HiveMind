@@ -37,6 +37,8 @@ class Cluster {
 
         bool aboveThreshold(unsigned int threshold);
 
+        bool aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height);
+
         void newEvent();
 
         int getSide(int width, int height);

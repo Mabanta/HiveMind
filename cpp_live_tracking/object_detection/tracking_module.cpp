@@ -67,7 +67,7 @@ void BeeTrackingModule::run() {
 				for (auto clustIt = clusters.begin(); clustIt != clusters.end();) 
 				{
 					// delete a cluster if it did not have enough events
-					if (!clustIt->aboveThreshold(clusterSustain))
+					if (!clustIt->aboveThreshold(clusterSustain, imageWidth, imageHeight))
 					{
 						clustIt = clusters.erase(clustIt);
 					}
@@ -139,9 +139,9 @@ void BeeTrackingModule::run() {
 					cluster.draw(trackImg);
 				}
 
-				cv::line(trackImg, cv::Point(imageWidth/2, imageHeight / 4), cv::Point(imageWidth/2, 3 * imageHeight / 4), cv::viz::Color::red());
-				cv::line(trackImg, cv::Point(imageWidth, imageHeight / 4), cv::Point(imageWidth / 2, imageHeight / 4), cv::viz::Color::red());
-				cv::line(trackImg, cv::Point(imageWidth, 3 * imageHeight / 4), cv::Point(imageWidth / 2, 3 * imageHeight / 4), cv::viz::Color::red());
+				cv::rectangle(trackImg, cv::Point(imageWidth*0.4, imageHeight*0.15), cv::Point(imageWidth*0.9, imageHeight*0.85), cv::viz::Color::red());
+				cv::rectangle(trackImg, cv::Point(imageWidth*0.4 + 5, imageHeight*0.15 + 5), cv::Point(imageWidth*0.9 - 5, imageHeight*0.85 - 5), cv::viz::Color::blue());
+	          	cv::rectangle(trackImg, cv::Point(imageWidth*0.4 - 5, imageHeight*0.15 - 5), cv::Point(imageWidth*0.9 + 5, imageHeight*0.85 + 5), cv::viz::Color::blue());
 
 				// display to dv-gui output
 				outputs.getFrameOutput("trackers") << trackImg << dv::commit;

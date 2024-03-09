@@ -53,7 +53,7 @@ public:
 	static void initConfigOptions(dv::RuntimeConfig &config) {
 		config.add("max_trackers", dv::ConfigOption::intOption("Max number of trackers", 20, 1, 100));
 		config.add("cluster_init_thresh", dv::ConfigOption::doubleOption("Threshold to intiailize a cluster", 0.9, 0.0, 1.0));
-		config.add("cluster_sustain_thresh", dv::ConfigOption::intOption("Number of events to keep a cluster active", 18, 1, 50));
+		config.add("cluster_sustain_thresh", dv::ConfigOption::intOption("Number of events to keep a cluster active (in thousands)", 35, 1, 50));
 		config.add("cluster_alpha", dv::ConfigOption::doubleOption("Amount each event affects the movement of a cluster", 0.1, 0.0, 1.0));
 		/* Model for allowing configuration
 		config.add("red", dv::ConfigOption::intOption("Value of the red color component", 255, 0, 255));
@@ -78,7 +78,7 @@ public:
 		maxTrackers = config.getInt("max_trackers");
 		clusterInit = config.getDouble("cluster_init_thresh");
 		clusterAlpha = config.getDouble("cluster_alpha");
-		clusterSustain = config.getDouble("cluster_sustain_thresh");
+		clusterSustain = config.getDouble("cluster_sustain_thresh") * 1000;
 	}
 
 	void run() override;
