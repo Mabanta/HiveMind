@@ -139,9 +139,13 @@ void BeeTrackingModule::run() {
 					cluster.draw(trackImg);
 				}
 
-				cv::rectangle(trackImg, cv::Point(imageWidth*0.4, imageHeight*0.15), cv::Point(imageWidth*0.9, imageHeight*0.85), cv::viz::Color::red());
-				cv::rectangle(trackImg, cv::Point(imageWidth*0.4 + 5, imageHeight*0.15 + 5), cv::Point(imageWidth*0.9 - 5, imageHeight*0.85 - 5), cv::viz::Color::blue());
-	          	cv::rectangle(trackImg, cv::Point(imageWidth*0.4 - 5, imageHeight*0.15 - 5), cv::Point(imageWidth*0.9 + 5, imageHeight*0.85 + 5), cv::viz::Color::blue());
+				cv::line(trackImg, cv::Point(imageWidth / 2, 0), cv::Point(imageWidth / 2, imageHeight), cv::viz::Color::red(), 1);
+				cv::line(trackImg, cv::Point(imageWidth / 2 - 5, 0), cv::Point(imageWidth / 2 - 5, imageHeight), cv::viz::Color::blue(), 1);
+				cv::line(trackImg, cv::Point(imageWidth / 2 + 5, 0), cv::Point(imageWidth / 2 + 5, imageHeight), cv::viz::Color::blue(), 1);
+
+				//cv::rectangle(trackImg, cv::Point(imageWidth*0.4, imageHeight*0.15), cv::Point(imageWidth*0.9, imageHeight*0.85), cv::viz::Color::red());
+				//cv::rectangle(trackImg, cv::Point(imageWidth*0.4 + 5, imageHeight*0.15 + 5), cv::Point(imageWidth*0.9 - 5, imageHeight*0.85 - 5), cv::viz::Color::blue());
+	          	//cv::rectangle(trackImg, cv::Point(imageWidth*0.4 - 5, imageHeight*0.15 - 5), cv::Point(imageWidth*0.9 + 5, imageHeight*0.85 + 5), cv::viz::Color::blue());
 
 				// display to dv-gui output
 				outputs.getFrameOutput("trackers") << trackImg << dv::commit;
