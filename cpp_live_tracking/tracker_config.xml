@@ -1,0 +1,180 @@
+<dv version="2.0">
+    <node name="mainloop" path="/mainloop/">
+        <attr key="_guiSupport" type="string">{"lastDeployedHash":"cbe667b0fef04201eb90b9430ff317eab1712743"}</attr>
+        <node name="Recorder" path="/mainloop/Recorder/">
+            <attr key="_guiSupport" type="string">{"boxX":450.0,"boxY":550.0}</attr>
+            <attr key="_priorityAttributes" type="string">compression,directory,prefix</attr>
+            <attr key="compression" type="string">LZ4</attr>
+            <attr key="directory" type="string">/root/HiveMind/cpp_live_tracking</attr>
+            <attr key="logLevel" type="string">INFO</attr>
+            <attr key="moduleLibrary" type="string">dv_output_file</attr>
+            <attr key="prefix" type="string">08_28_live_</attr>
+            <attr key="running" type="bool">false</attr>
+            <attr key="timeout" type="long">0</attr>
+            <node name="inputs" path="/mainloop/Recorder/inputs/">
+                <node name="output0" path="/mainloop/Recorder/inputs/output0/">
+                    <attr key="from" type="string">capture[events]</attr>
+                </node>
+                <node name="output1" path="/mainloop/Recorder/inputs/output1/">
+                    <attr key="from" type="string">user_tracker_module[trackers]</attr>
+                </node>
+                <node name="output2" path="/mainloop/Recorder/inputs/output2/">
+                    <attr key="from" type="string"/>
+                </node>
+                <node name="output3" path="/mainloop/Recorder/inputs/output3/">
+                    <attr key="from" type="string"/>
+                </node>
+            </node>
+        </node>
+        <node name="_visualizer_capture___events_0" path="/mainloop/_visualizer_capture___events_0/">
+            <attr key="_guiSupport" type="string">{"visualizerX":0,"visualizerY":1,"size":10,"minimized":false,"boxX":150.0,"boxY":550.0}</attr>
+            <attr key="_priorityAttributes" type="string">compression,ipAddress,portNumber</attr>
+            <attr key="compression" type="string">NONE</attr>
+            <attr key="ipAddress" type="string">127.0.0.1</attr>
+            <attr key="logLevel" type="string">INFO</attr>
+            <attr key="maxConcurrentConnections" type="int">10</attr>
+            <attr key="maxConnectionsBacklog" type="int">5</attr>
+            <attr key="maxDataBacklog" type="int">5</attr>
+            <attr key="moduleLibrary" type="string">dv_output_net_tcp_server</attr>
+            <attr key="portNumber" type="int">38025</attr>
+            <attr key="running" type="bool">true</attr>
+            <attr key="timeout" type="long">0</attr>
+            <node name="inputs" path="/mainloop/_visualizer_capture___events_0/inputs/">
+                <node name="output0" path="/mainloop/_visualizer_capture___events_0/inputs/output0/">
+                    <attr key="from" type="string">capture[events]</attr>
+                </node>
+            </node>
+        </node>
+        <node name="_visualizer_user_tracker_module___trackers_a79df1be0d9e43268a31d3c3cd4eb6c7" path="/mainloop/_visualizer_user_tracker_module___trackers_a79df1be0d9e43268a31d3c3cd4eb6c7/">
+            <attr key="_guiSupport" type="string">{"visualizerX":0,"visualizerY":0,"size":2,"minimized":false,"boxX":150.0,"boxY":550.0}</attr>
+            <attr key="_priorityAttributes" type="string">compression,ipAddress,portNumber</attr>
+            <attr key="compression" type="string">NONE</attr>
+            <attr key="ipAddress" type="string">127.0.0.1</attr>
+            <attr key="logLevel" type="string">INFO</attr>
+            <attr key="maxConcurrentConnections" type="int">10</attr>
+            <attr key="maxConnectionsBacklog" type="int">5</attr>
+            <attr key="maxDataBacklog" type="int">5</attr>
+            <attr key="moduleLibrary" type="string">dv_output_net_tcp_server</attr>
+            <attr key="portNumber" type="int">36343</attr>
+            <attr key="running" type="bool">true</attr>
+            <attr key="timeout" type="long">0</attr>
+            <node name="inputs" path="/mainloop/_visualizer_user_tracker_module___trackers_a79df1be0d9e43268a31d3c3cd4eb6c7/inputs/">
+                <node name="output0" path="/mainloop/_visualizer_user_tracker_module___trackers_a79df1be0d9e43268a31d3c3cd4eb6c7/inputs/output0/">
+                    <attr key="from" type="string">user_tracker_module[trackers]</attr>
+                </node>
+            </node>
+        </node>
+        <node name="capture" path="/mainloop/capture/">
+            <attr key="_guiSupport" type="string">{"boxX":300.0,"boxY":100.0}</attr>
+            <attr key="_priorityAttributes" type="string">biasSensitivity</attr>
+            <attr key="biasSensitivity" type="string">Default</attr>
+            <attr key="busNumber" type="int">0</attr>
+            <attr key="devAddress" type="int">0</attr>
+            <attr key="externalTriggerMode" type="string">Reset Timestamps</attr>
+            <attr key="logLevel" type="string">WARNING</attr>
+            <attr key="moduleLibrary" type="string">dv_dvxplorer</attr>
+            <attr key="running" type="bool">true</attr>
+            <attr key="serialNumber" type="string">DXA00216</attr>
+            <node name="bias" path="/mainloop/capture/bias/">
+                <attr key="BIAS_AMP" type="int">4</attr>
+                <attr key="BIAS_OFF" type="int">9</attr>
+                <attr key="BIAS_ON" type="int">9</attr>
+                <attr key="CURRENT_LEVEL_SF" type="string">x1</attr>
+                <attr key="CURRENT_RANGE_LOG" type="string">5uA</attr>
+                <attr key="CURRENT_RANGE_LOGA" type="string">50uA</attr>
+                <attr key="CURRENT_RANGE_LOGD" type="string">50uA</attr>
+                <attr key="CURRENT_RANGE_SF" type="string">5uA</attr>
+                <attr key="CURRENT_RANGE_nRST" type="string">0.5uA</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="crop" path="/mainloop/capture/crop/">
+                <attr key="Enable" type="bool">false</attr>
+                <attr key="EndX" type="int">639</attr>
+                <attr key="EndY" type="int">479</attr>
+                <attr key="StartX" type="int">0</attr>
+                <attr key="StartY" type="int">0</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="externalInput" path="/mainloop/capture/externalInput/">
+                <attr key="DetectFallingEdges" type="bool">false</attr>
+                <attr key="DetectPulseLength" type="int">10</attr>
+                <attr key="DetectPulsePolarity" type="bool">true</attr>
+                <attr key="DetectPulses" type="bool">false</attr>
+                <attr key="DetectRisingEdges" type="bool">false</attr>
+                <attr key="GenerateInjectOnFallingEdge" type="bool">false</attr>
+                <attr key="GenerateInjectOnRisingEdge" type="bool">false</attr>
+                <attr key="GeneratePulseInterval" type="int">10</attr>
+                <attr key="GeneratePulseLength" type="int">5</attr>
+                <attr key="GeneratePulsePolarity" type="bool">true</attr>
+                <attr key="RunDetector" type="bool">false</attr>
+                <attr key="RunGenerator" type="bool">false</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="imu" path="/mainloop/capture/imu/">
+                <attr key="AccelDataRate" type="string">800 Hz</attr>
+                <attr key="AccelFilter" type="string">Normal</attr>
+                <attr key="AccelRange" type="string">±4G</attr>
+                <attr key="GyroDataRate" type="string">800 Hz</attr>
+                <attr key="GyroFilter" type="string">Normal</attr>
+                <attr key="GyroRange" type="string">±500°/s</attr>
+                <attr key="RunAccelerometer" type="bool">true</attr>
+                <attr key="RunGyroscope" type="bool">true</attr>
+                <attr key="RunTemperature" type="bool">true</attr>
+                <attr key="_priorityAttributes" type="string">RunAccelerometer,RunGyroscope</attr>
+            </node>
+            <node name="multiplexer" path="/mainloop/capture/multiplexer/">
+                <attr key="DropDVSOnTransferStall" type="bool">false</attr>
+                <attr key="DropExtInputOnTransferStall" type="bool">true</attr>
+                <attr key="TimestampReset" type="bool">false</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="readout" path="/mainloop/capture/readout/">
+                <attr key="GlobalHold" type="bool">true</attr>
+                <attr key="GlobalReset" type="bool">false</attr>
+                <attr key="_priorityAttributes" type="string">eFPS</attr>
+                <attr key="eFPS" type="string">5000 (variable)</attr>
+            </node>
+            <node name="statistics" path="/mainloop/capture/statistics/">
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="subsample" path="/mainloop/capture/subsample/">
+                <attr key="DualBinning" type="bool">false</attr>
+                <attr key="Enable" type="bool">false</attr>
+                <attr key="EventsFlatten" type="bool">false</attr>
+                <attr key="EventsOffOnly" type="bool">false</attr>
+                <attr key="EventsOnOnly" type="bool">false</attr>
+                <attr key="Horizontal" type="string">none</attr>
+                <attr key="Vertical" type="string">none</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="system" path="/mainloop/capture/system/">
+                <attr key="DataExchangeBufferSize" type="int">64</attr>
+                <attr key="PacketContainerInterval" type="int">10000</attr>
+                <attr key="PacketContainerMaxPacketSize" type="int">0</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+            <node name="usb" path="/mainloop/capture/usb/">
+                <attr key="BufferNumber" type="int">8</attr>
+                <attr key="BufferSize" type="int">8192</attr>
+                <attr key="EarlyPacketDelay" type="int">8</attr>
+                <attr key="_priorityAttributes" type="string"/>
+            </node>
+        </node>
+        <node name="user_tracker_module" path="/mainloop/user_tracker_module/">
+            <attr key="_guiSupport" type="string">{"boxX":400.0,"boxY":300.0}</attr>
+            <attr key="_priorityAttributes" type="string">cluster_alpha,cluster_init_thresh,cluster_sustain_thresh,max_trackers</attr>
+            <attr key="cluster_alpha" type="double">0.1</attr>
+            <attr key="cluster_init_thresh" type="double">0.9</attr>
+            <attr key="cluster_sustain_thresh" type="int">18</attr>
+            <attr key="logLevel" type="string">INFO</attr>
+            <attr key="max_trackers" type="int">20</attr>
+            <attr key="moduleLibrary" type="string">user_tracker_module</attr>
+            <attr key="running" type="bool">true</attr>
+            <node name="inputs" path="/mainloop/user_tracker_module/inputs/">
+                <node name="events" path="/mainloop/user_tracker_module/inputs/events/">
+                    <attr key="from" type="string">capture[events]</attr>
+                </node>
+            </node>
+        </node>
+    </node>
+</dv>
