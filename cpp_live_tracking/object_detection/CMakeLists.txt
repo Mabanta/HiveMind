@@ -18,7 +18,7 @@ set(DV_LIBRARIES ${DV_LIBRARIES} Boost::boost Boost::filesystem)
 find_package(OpenCV)
 set(DV_LIBRARIES ${DV_LIBRARIES} ${OpenCV_LIBS})
 
-include_directories(/usr/include, /opt/inivation)
+include_directories(/usr/include, /opt/inivation, ..)
 link_directories(../cluster/build)
 
 add_executable(cpp_object_detection.exe cpp_object_detection.cpp)
@@ -28,6 +28,9 @@ add_executable(cpp_object_detection_record_v2.exe cpp_object_detection_record_v2
 add_executable(file_object_detection.exe file_object_detection.cpp)
 add_executable(file_object_detection_time.exe file_object_detection_time.cpp)
 add_executable(cluster_visualize.exe cluster_visualize.cpp)
+ADD_LIBRARY(tracker_module SHARED tracking_module.cpp)
+
+set_target_properties(tracker_module PROPERTIES PREFIX "user_")
 
 
 target_link_libraries(cpp_object_detection.exe PRIVATE ${DV_LIBRARIES})
@@ -53,3 +56,10 @@ target_link_libraries(cluster_visualize.exe PRIVATE cluster)
 
 target_link_libraries(cpp_object_detection_record_v2.exe PRIVATE ${DV_LIBRARIES})
 target_link_libraries(cpp_object_detection_record_v2.exe PRIVATE cluster)
+target_link_libraries(cpp_object_detection.exe PRIVATE ${DV_LIBRARIES})
+target_link_libraries(cpp_object_detection.exe PRIVATE cluster)
+
+target_link_libraries(tracker_module PRIVATE dv::sdk)
+target_link_libraries(tracker_module PRIVATE cluster)
+install(TARGETS tracker_module DESTINATION ${DV_MODULES_DIR})
+

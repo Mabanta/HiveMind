@@ -13,12 +13,14 @@ class Cluster {
         bool newFrequency{false};
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
+        int64_t startTime;
+        unsigned int num_oscillators{12};
+        int omega_min{190};
+        double A [12], phi [12], omega [12];
         cv::viz::Color color;
 
     public:
-        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
-
-        Cluster(unsigned int x, unsigned int y, float alpha);
+        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time);
 
         double distance(unsigned int x, unsigned int y);
 
@@ -38,15 +40,21 @@ class Cluster {
 
         bool aboveThreshold(unsigned int threshold);
 
-        bool aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height);
-
         void newEvent();
 
-        int getSide(int width, int height);
+        int getSide(int width);
 
-        int updateSide(int width, int height);
+        int updateSide(int width);
 
         void resetEvents();
+
+        void update_osc(int64_t timestamp, double time_constant);
+
+        int getFrequency();
+
+        double* getSpectrum();
+
+        int getID();
 
         void draw(cv::Mat img);
 

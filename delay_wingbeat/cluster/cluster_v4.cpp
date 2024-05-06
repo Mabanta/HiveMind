@@ -1,8 +1,9 @@
-#include "cluster.hpp"
+#include "cluster_v4.hpp"
 
-int Cluster::globId = 0;
+long Cluster::globId = 0;
+const double pi = 3.14159;
 
-Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha) {
+Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time) {
     this->alpha = alpha;
     this->x = (double)x;
     this->y = (double)y;
@@ -10,15 +11,12 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->prev_y = (double)y;
     this->color = color;
     this->id = globId++;
-}
 
-Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
-    this->alpha = alpha;
-    this->x = (double)x;
-    this->y = (double)y;
-    this->prev_x = (double)x;
-    this->prev_y = (double)y;
-    this->id = globId++;
+    for (int i = 0; i < 11; i++) {
+        for (int j = 0; j < 11; j++) {
+            pixels[i][j] = std::make_tuple(true, -1, 0.0, -1);
+        }
+    }
 }
 
 double Cluster::distance(unsigned int x, unsigned int y) {
@@ -64,12 +62,43 @@ bool Cluster::aboveThreshold(unsigned int threshold) {
     return eventCount >= threshold;
 }
 
-bool Cluster::aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height) {
-    return eventCount >= threshold && x >= 0 && y >= 0 && x <= width && y <= height;
-}
-
 void Cluster::newEvent() {
     eventCount++;
+}
+
+void Cluster::updateFreq(dv::Event event) {
+    // adjust x and y so it is the relative position in the array
+    // with the center at [10][10]
+
+    if (distance(event.x(), event.y()) > 5) {
+        return;
+    }
+
+    int surfaceX = (event.x() - this->x) + 5;
+    int surfaceY = (event.y() - this->y) + 5;
+
+    auto pixelData = pixels[surfaceX][surfaceY];
+    
+    int64_t prevTime = std::get<1>(pixelData);
+    double runningAvg = std::get<2>(pixelData);
+    int transitionCount = std::get<3>(pixelData);
+
+    if (event.polarity() && !std::get<0>(pixelData)) {
+        if (event.timestamp() - prevTime > 10000) {
+            transitionCount = 0;
+            runningAvg = 0;
+            prevTime = 0;
+        }
+
+        if (prevTime > 0) {
+            runningAvg = (15 * runningAvg + (event.timestamp() - prevTime)) / 16;
+        }
+
+        prevTime = event.timestamp();
+        transitionCount++;
+    }
+
+    pixels[surfaceX][surfaceY] = std::make_tuple(event.polarity(), prevTime, runningAvg, transitionCount);
 }
 
 
@@ -77,29 +106,16 @@ void Cluster::resetEvents() {
     eventCount = 0;
 }
 
-int Cluster::getSide(int width, int height) {
-
-  double leftSide = (double)(width*0.4);
-  double rightSide = (double)(width*0.9);
-  double top = (double)(height*0.85);
-  double bottom = (double)(height*0.15);
-
-  if (x > (leftSide + 5) && x < (rightSide - 5) && y > (bottom + 5) && y < (top - 5))
-    return 1;
-  else if ((x < (leftSide - 5) || x > (rightSide + 5)) || (y < (bottom - 5) || y > (top + 5)))
-    return -1;
-  return 0;
-
-  /*
+int Cluster::getSide(int width) {
   if (x < (double)(width/2 - 10))
     return -1;
   else if (x > (double)(width/2 + 10))
     return 1;
-  return 0;*/
+  return 0;
 }
 
-int Cluster::updateSide(int width, int height) {
-  int newSide = getSide(width, height);
+int Cluster::updateSide(int width) {
+  int newSide = getSide(width);
   if (newSide != side && newSide != 0) {
     bool sideZero = (side == 0);
     side = newSide;
@@ -110,23 +126,32 @@ int Cluster::updateSide(int width, int height) {
 }
 
 void Cluster::draw(cv::Mat img) {
-    cv::rectangle(
-        img, 
-        cv::Point(int(x - radius / 2), int(y - radius / 2)), 
-        cv::Point(int(x + radius / 2), int(y + radius / 2)), 
-        color);
+    cv::circle(img, cv::Point(x, y), radius, color);
 }
 
-float Cluster::getRadius() {
-  return radius;
+int Cluster::getFrequency() {
+    double sum = 0.0;
+    int total = 0;
+
+    for (int i = 0; i < 7; i++) {
+        for (int j = 0; j < 7; j++) {
+            auto pixelData = pixels[i][j];
+
+            if (std::get<3>(pixelData) >= 16) {
+                sum += std::get<2>(pixelData);
+                total++;
+            }
+        }
+    }
+
+    if (total > 0) {
+        return 1000000 / (sum / total);
+    }
+
+    return -1;
 }
-int Cluster::getX() {
-  return x;
-}
-int Cluster::getY() {
-  return y;
-}
-int Cluster::getID() {
+
+long Cluster::getID() {
   return id;
 }
 

@@ -1,17 +1,27 @@
 # HiveMind
 Repository for GEMSTONE team Hive Mind
 
-## Getting C++ Working on Mac
+# Changes for the branch
+This is me modifying the README so that it shows up as a change :P :P :P
+# HiveMind
+Repository for GEMSTONE team Hive Mind
 
-1. The recommended toolchain is the standard toolchain provided by Apple with XCode. To install this, run:
-```
-xcode-select --install
-```
+# Changes for the branch
+This is me modifying the README so that it shows up as a change :P
 
-2. We also require cmake to build applications. The easiest way to install cmake is via Homebrew. Run:
-```
-brew install cmake
-```
+Matthew Lynch
+=======
+
+# Sign when you have Git Working!
+Matthew Lynch
+Daniel was here.
+Stefan Traska
+=======
+# HiveMind
+Repository for GEMSTONE team Hive Mind
+
+# Changes for the branch
+This is me modifying the README so that it shows up as a change :P
 
 3. Download DV: 
 Go to this link, download

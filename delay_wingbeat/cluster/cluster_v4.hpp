@@ -2,23 +2,25 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <cstdlib>
 #include <tgmath.h>
+#include <dv-processing/core/core.hpp>
+#include <tuple>
 
 class Cluster {
     private:
-        static int globId;
+        static long globId;
         int id, side{0};
-        unsigned int eventCount{0}, posIndex{0};
-        bool newFrequency{false};
+        int64_t prevTime = -1;
+        int eventCount = 0;
         double x, y, prev_x, prev_y;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
         cv::viz::Color color;
+        std::tuple<bool, int64_t, double, int> pixels[11][11];
 
     public:
-        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
-
-        Cluster(unsigned int x, unsigned int y, float alpha);
+        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time);
 
         double distance(unsigned int x, unsigned int y);
 
@@ -38,15 +40,19 @@ class Cluster {
 
         bool aboveThreshold(unsigned int threshold);
 
-        bool aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height);
-
         void newEvent();
 
-        int getSide(int width, int height);
+        void updateFreq(dv::Event);
 
-        int updateSide(int width, int height);
+        int getSide(int width);
+
+        int updateSide(int width);
 
         void resetEvents();
+
+        int getFrequency();
+
+        long getID();
 
         void draw(cv::Mat img);
 

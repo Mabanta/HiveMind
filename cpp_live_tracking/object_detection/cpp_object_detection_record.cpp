@@ -1,4 +1,4 @@
-#include "../cluster/cluster.hpp"
+#include <cluster/cluster.hpp>
 #include "constants.hpp"
 
 #include <dv-processing/core/core.hpp>
@@ -32,6 +32,9 @@ int main(int argc, char* argv[])
 
 	// create a capture object to read events from any DVS device connected
 	dv::io::CameraCapture capture("", dv::io::CameraCapture::CameraType::DVS);
+
+	capture.setDVSGlobalHold(false);
+	capture.setDVSBiasSensitivity(dv::io::CameraCapture::BiasSensitivity::High);
 
 	// retrieve the event resolution
 	std::optional<cv::Size> resolutionWrapper = capture.getEventResolution();
@@ -163,7 +166,7 @@ int main(int argc, char* argv[])
 						{
 							// delete a cluster if it did not have enough events
 							Cluster cluster = clusters.at(i);
-							if (!cluster.aboveThreshold(constants::clusterSustainThresh))
+							if (!cluster.aboveThreshold(constants::clusterSustainThresh, imageWidth, imageHeight))
 							{
 								clusters.erase(clusters.begin() + i);
 								i--;

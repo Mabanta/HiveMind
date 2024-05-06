@@ -1,6 +1,6 @@
 // based on https://gitlab.com/inivation/dv/dv-processing/-/blob/rel_1.5/samples/io/aedat4-player.cpp
 
-#include <cluster/cluster.hpp>
+#include "./cluster/cluster.hpp"
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
 
@@ -35,12 +35,12 @@ int main(void) {
 
 	//cout << "Enter path to file: " << endl;
 
-	string filePath = "./event_log_10_7_board.aedat4";
+	string filePath = "./event_log_10_7_no_board.aedat4";
 	//string filePath = "./event_log_beehive_9_18_hori.aedat4";
 	//cin >> filePath;
 
 	fstream clusterLog;
-	clusterLog.open("./cluster_log_10_7_board.csv");
+	clusterLog.open("./cluster_log_10_7_no_board.csv");
 	//clusterLog.open("./cluster_log_beehive_9_18_hori.csv");
 
 	auto reader = dv::io::MonoCameraRecording(filePath);
@@ -63,14 +63,14 @@ int main(void) {
 	// define a function for when the file reader encounters an event packet
 	handler.mEventHandler = [&tsImg, &lastTimeStamp, &imageWidth, &imageHeight,
 	&nextFrame, &clusterLog, &nextTime, &cluster_x, &cluster_y, &cluster_r, &line](const dv::EventStore &nextEvent) {
-		const double imgScaleFactor = 0.7;
+		const double imgScaleFactor = 0.4;
 
 	// Frame rate is used to control the display
 	// The actual algorithm won't use frames, but we have to use frames if we want to see the data
-		const int frameRate = 200;
+		const int frameRate = 1500;
 		const int displayTime = 1000000 / frameRate;
 
-		const int updateRate = 150;
+		const int updateRate = 500;
 		const int delayTime = 1000000 / updateRate;
 
 		const double alpha = 0.1;
@@ -113,7 +113,9 @@ int main(void) {
 			}
 
 			if (!pol) {
-				tsImg.at<Vec3b>(y,x) = Vec3b(255, 255, 255);
+				tsImg.at<Vec3b>(y,x)[2] = 255;
+			} else {
+				tsImg.at<Vec3b>(y,x)[1] = 255;
 			}
 
 			if (timeStamp > nextTime) {
@@ -126,7 +128,7 @@ int main(void) {
 				totalCrossing = (int)readClusterLog(&strIndex, line);
 				netCrossing = (int)readClusterLog(&strIndex, line);
 
-				cout << "Total: " << totalCrossing << ", Net: " << netCrossing << endl;
+				//cout << "Total: " << totalCrossing << ", Net: " << netCrossing << endl;
 
 				cluster_x = vector<float>();
 				cluster_y = vector<float>();
@@ -160,7 +162,7 @@ int main(void) {
 
 				if(!cluster_x.empty()) {
 					for (int i = 0; i < cluster_x.size(); i ++) {
-						cv::circle(trackImg, cv::Point(cluster_x.at(i), cluster_y.at(i)), cluster_r.at(i), viz::Color::blue());
+						cv::circle(trackImg, cv::Point(cluster_x.at(i), cluster_y.at(i)), cluster_r.at(i), viz::Color::white());
 					}
 				}
 

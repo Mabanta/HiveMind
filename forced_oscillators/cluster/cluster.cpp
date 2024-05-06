@@ -1,8 +1,9 @@
 #include "cluster.hpp"
 
 int Cluster::globId = 0;
+const double pi = 3.14159;
 
-Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha) {
+Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time) {
     this->alpha = alpha;
     this->x = (double)x;
     this->y = (double)y;
@@ -10,15 +11,12 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->prev_y = (double)y;
     this->color = color;
     this->id = globId++;
-}
-
-Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
-    this->alpha = alpha;
-    this->x = (double)x;
-    this->y = (double)y;
-    this->prev_x = (double)x;
-    this->prev_y = (double)y;
-    this->id = globId++;
+    this->startTime = time;
+    for (int i = 0; i < num_oscillators; i ++) {
+      this->A[i] = 0;
+      this->phi[i] = 0;
+      this->omega[i] = omega_min + 5*i;
+    }
 }
 
 double Cluster::distance(unsigned int x, unsigned int y) {
@@ -64,10 +62,6 @@ bool Cluster::aboveThreshold(unsigned int threshold) {
     return eventCount >= threshold;
 }
 
-bool Cluster::aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height) {
-    return eventCount >= threshold && x >= 0 && y >= 0 && x <= width && y <= height;
-}
-
 void Cluster::newEvent() {
     eventCount++;
 }
@@ -77,29 +71,16 @@ void Cluster::resetEvents() {
     eventCount = 0;
 }
 
-int Cluster::getSide(int width, int height) {
-
-  double leftSide = (double)(width*0.4);
-  double rightSide = (double)(width*0.9);
-  double top = (double)(height*0.85);
-  double bottom = (double)(height*0.15);
-
-  if (x > (leftSide + 5) && x < (rightSide - 5) && y > (bottom + 5) && y < (top - 5))
-    return 1;
-  else if ((x < (leftSide - 5) || x > (rightSide + 5)) || (y < (bottom - 5) || y > (top + 5)))
-    return -1;
-  return 0;
-
-  /*
+int Cluster::getSide(int width) {
   if (x < (double)(width/2 - 10))
     return -1;
   else if (x > (double)(width/2 + 10))
     return 1;
-  return 0;*/
+  return 0;
 }
 
-int Cluster::updateSide(int width, int height) {
-  int newSide = getSide(width, height);
+int Cluster::updateSide(int width) {
+  int newSide = getSide(width);
   if (newSide != side && newSide != 0) {
     bool sideZero = (side == 0);
     side = newSide;
@@ -110,22 +91,38 @@ int Cluster::updateSide(int width, int height) {
 }
 
 void Cluster::draw(cv::Mat img) {
-    cv::rectangle(
-        img, 
-        cv::Point(int(x - radius / 2), int(y - radius / 2)), 
-        cv::Point(int(x + radius / 2), int(y + radius / 2)), 
-        color);
+    cv::circle(img, cv::Point(x, y), radius, color);
 }
 
-float Cluster::getRadius() {
-  return radius;
+void Cluster::update_osc(int64_t timestamp, double time_constant) {
+    double t_i = ((double)(timestamp - startTime))/1000000;
+    double A_i  = exp(time_constant*t_i);
+
+    for (int w = 0; w < num_oscillators; w ++) {
+      double phi_i = 2*pi*omega[w]*t_i + pi/2; // Phi_i is phase shift of event relative to oscillator
+      A[w] = sqrt(A[w]*A[w]+A_i*A_i+2*A[w]*A_i*cos(phi[w]-phi_i)); // A[w] is amplitude of oscillator 
+      phi[w] = atan((A[w]*sin(phi[w])+A_i*sin(phi_i))/(A[w]*cos(phi[w])+A_i*cos(phi_i))); // phi[w] is phase shift of oscillator
+    }
 }
-int Cluster::getX() {
-  return x;
+
+int Cluster::getFrequency() {
+    double max = 0;
+    int maxFreq = 0;
+    for (int w = 0; w < num_oscillators; w++) {
+      if (A[w] > max) {
+        max = A[w];
+        maxFreq = w;
+      }
+    }
+
+    if (max > 0) return omega[maxFreq];
+    return -1;
 }
-int Cluster::getY() {
-  return y;
+
+double* Cluster::getSpectrum() {
+  return &A[0];
 }
+
 int Cluster::getID() {
   return id;
 }

@@ -76,6 +76,10 @@ CMakeLists.txt does not actually do the compiling, it instead generates a Makefi
 
 ## Makefiles
 
-The Makefile can be used to compile individual executables or all of the them at once. To make an individual executable, run `make <executable-name>`, where the executable name can be found by looking at the `add_executable` command in CMakeLists.txt. To make all of the executables, just run `make` or `make all`. 
+The Makefile can be used to compile individual executables or all of the them at once. To make an individual executable, run `make <executable-name>`, where the executable name can be found by looking at the `add_executable` command in CMakeLists.txt. To make all of the executables, just run `make install` or `make install all`. 
 
 Once the executable is created, it can be run with `./executable-name` in the directory where the executable is. 
+
+## DV-Modules
+
+The `make install` or `make install <module name>` should compile the module and install it in the appropriate directory. From there, DV can be opened with `sudo dv-gui &`. The "structure" tab allows you to add an configure modules. Select "Add Module" and look for a module with prefix "user_". If it doesn't appear, select "Modify module search path" to select the folder where the module appears (this should be in the output of make install). Then drag the event input from the "Capture" module to input of our module and the output frames to "Visualize in GUI". Then select the play button and return to the "Output" tab. Once data from a camera or file is given, the output from the module should show.   

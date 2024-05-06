@@ -1,6 +1,6 @@
 // based on https://gitlab.com/inivation/dv/dv-processing/-/blob/rel_1.5/samples/io/aedat4-player.cpp
 
-#include <cluster/cluster.hpp>
+#include "./cluster/cluster.hpp"
 
 #define LIBCAER_FRAMECPP_OPENCV_INSTALLED 0
 
@@ -35,12 +35,12 @@ int main(void) {
 
 	//cout << "Enter path to file: " << endl;
 
-	string filePath = "./event_log_10_7_board.aedat4";
+	string filePath = "./event_log_10_11_freq_250ms_2.aedat4";
 	//string filePath = "./event_log_beehive_9_18_hori.aedat4";
 	//cin >> filePath;
 
 	fstream clusterLog;
-	clusterLog.open("./cluster_log_10_7_board.csv");
+	clusterLog.open("./cluster_log_10_11_freq_250ms_2.csv");
 	//clusterLog.open("./cluster_log_beehive_9_18_hori.csv");
 
 	auto reader = dv::io::MonoCameraRecording(filePath);
@@ -126,7 +126,7 @@ int main(void) {
 				totalCrossing = (int)readClusterLog(&strIndex, line);
 				netCrossing = (int)readClusterLog(&strIndex, line);
 
-				cout << "Total: " << totalCrossing << ", Net: " << netCrossing << endl;
+				//cout << "Total: " << totalCrossing << ", Net: " << netCrossing << endl;
 
 				cluster_x = vector<float>();
 				cluster_y = vector<float>();
@@ -136,14 +136,18 @@ int main(void) {
 				if (line[strIndex] != ',') {
 					while (line[strIndex] != ',' && line[strIndex] != '\n') {
 
-						float values[5];
-						for (int i = 0; i < 5; i ++) {
+						float values[6];
+						for (int i = 0; i < 6; i ++) {
 							values[i] = readClusterLog(&strIndex, line);
 						}
 
-						cluster_x.push_back(values[0]);
-						cluster_y.push_back(values[1]);
-						cluster_r.push_back(values[2]);
+						cluster_x.push_back(values[1]);
+						cluster_y.push_back(values[2]);
+						cluster_r.push_back(values[3]);
+
+						if (values[5]) {
+							cout << "Cluster " << values[0] << "Frequency: " << values[4] << endl;
+						}
 
 						strIndex ++;
 					}

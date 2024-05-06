@@ -1,23 +1,15 @@
 #include "cluster.hpp"
 
 int Cluster::globId = 0;
+const double pi = 3.14159;
 
-Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha) {
+Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, int64_t time) {
     this->alpha = alpha;
     this->x = (double)x;
     this->y = (double)y;
     this->prev_x = (double)x;
     this->prev_y = (double)y;
     this->color = color;
-    this->id = globId++;
-}
-
-Cluster::Cluster(unsigned int x, unsigned int y, float alpha) {
-    this->alpha = alpha;
-    this->x = (double)x;
-    this->y = (double)y;
-    this->prev_x = (double)x;
-    this->prev_y = (double)y;
     this->id = globId++;
 }
 
@@ -64,12 +56,28 @@ bool Cluster::aboveThreshold(unsigned int threshold) {
     return eventCount >= threshold;
 }
 
-bool Cluster::aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height) {
-    return eventCount >= threshold && x >= 0 && y >= 0 && x <= width && y <= height;
-}
-
 void Cluster::newEvent() {
     eventCount++;
+}
+
+void Cluster::updateFreq(dv::Event event) {
+
+    if (event.polarity() && !prevPol) {
+        if (event.timestamp() - prevTime > 10000) {
+            transitionCount = 0;
+            runningAvg = 0;
+            prevTime = 0;
+        }
+
+        if (prevTime > 0) {
+            runningAvg = (7 * runningAvg + (event.timestamp() - prevTime)) / 8.0;
+        }
+
+        prevTime = event.timestamp();
+        transitionCount++;
+    }
+
+    prevPol = event.polarity();
 }
 
 
@@ -77,29 +85,16 @@ void Cluster::resetEvents() {
     eventCount = 0;
 }
 
-int Cluster::getSide(int width, int height) {
-
-  double leftSide = (double)(width*0.4);
-  double rightSide = (double)(width*0.9);
-  double top = (double)(height*0.85);
-  double bottom = (double)(height*0.15);
-
-  if (x > (leftSide + 5) && x < (rightSide - 5) && y > (bottom + 5) && y < (top - 5))
-    return 1;
-  else if ((x < (leftSide - 5) || x > (rightSide + 5)) || (y < (bottom - 5) || y > (top + 5)))
-    return -1;
-  return 0;
-
-  /*
+int Cluster::getSide(int width) {
   if (x < (double)(width/2 - 10))
     return -1;
   else if (x > (double)(width/2 + 10))
     return 1;
-  return 0;*/
+  return 0;
 }
 
-int Cluster::updateSide(int width, int height) {
-  int newSide = getSide(width, height);
+int Cluster::updateSide(int width) {
+  int newSide = getSide(width);
   if (newSide != side && newSide != 0) {
     bool sideZero = (side == 0);
     side = newSide;
@@ -110,22 +105,17 @@ int Cluster::updateSide(int width, int height) {
 }
 
 void Cluster::draw(cv::Mat img) {
-    cv::rectangle(
-        img, 
-        cv::Point(int(x - radius / 2), int(y - radius / 2)), 
-        cv::Point(int(x + radius / 2), int(y + radius / 2)), 
-        color);
+    cv::circle(img, cv::Point(x, y), radius, color);
 }
 
-float Cluster::getRadius() {
-  return radius;
+int Cluster::getFrequency() {
+    if (transitionCount > 7) {
+        return runningAvg;
+    }
+
+    return -1;
 }
-int Cluster::getX() {
-  return x;
-}
-int Cluster::getY() {
-  return y;
-}
+
 int Cluster::getID() {
   return id;
 }

@@ -4,21 +4,24 @@
 #include <opencv2/imgproc.hpp>
 #include <cstdlib>
 #include <tgmath.h>
+#include <fftw3.h>
 
 class Cluster {
     private:
         static int globId;
         int id, side{0};
-        unsigned int eventCount{0}, posIndex{0};
+        unsigned int eventCount{0}, posIndex{0}, sampleFreq, numPositions;
+        unsigned int negCount{0}, posCount{0};
         bool newFrequency{false};
-        double x, y, prev_x, prev_y;
+        double x, y, prev_x, prev_y, frequency;
         double alpha, radius{25.0}, vel_x{0.0}, vel_y{0.0};
+        fftw_complex *polarity_history, *freq_spectrum;
+        fftw_plan plan;
         cv::viz::Color color;
 
     public:
-        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha);
-
-        Cluster(unsigned int x, unsigned int y, float alpha);
+        Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alpha, unsigned int sampleFreq,
+          unsigned int numPositions);
 
         double distance(unsigned int x, unsigned int y);
 
@@ -38,13 +41,19 @@ class Cluster {
 
         bool aboveThreshold(unsigned int threshold);
 
-        bool aboveThreshold(unsigned int threshold, unsigned int width, unsigned int height);
+        void newEvent(bool polarity);
 
-        void newEvent();
+        int getSide(int width);
 
-        int getSide(int width, int height);
+        int updateSide(int width);
 
-        int updateSide(int width, int height);
+        void addHistory();
+
+        void fft();
+
+        double getFrequency();
+
+        int getID();
 
         void resetEvents();
 
