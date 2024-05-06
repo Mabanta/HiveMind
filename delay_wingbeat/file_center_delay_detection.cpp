@@ -40,6 +40,10 @@ int main(void) {
     //String filePath = "./event_log_001.aedat4";
   	auto reader = dv::io::MonoCameraRecording(filePath);
 
+	ofstream dataLog;
+  	dataLog.open("./02_01_led_center_freq.csv");
+    dataLog << "Cluster ID, " << "Frequency, " << std::endl;
+
     dv::io::DataReadHandler handler;
   	int64_t lastTimeStamp = -1;
     int colorIndex = 0;
@@ -65,7 +69,7 @@ int main(void) {
 
 	// define a function for when the file reader encounters an event packet
   	handler.mEventHandler = [&tsImg, &tsBlurred, &lastTimeStamp, &nextTime, &nextFrame, &nextSustain, &prevTime, &nextSample,
-    	&clusters, &imageWidth, &imageHeight, &blurScale, &colorIndex, &beesEntering, &beesLeaving](const dv::EventStore &nextEvent) {
+    	&clusters, &imageWidth, &imageHeight, &blurScale, &colorIndex, &beesEntering, &beesLeaving, &dataLog](const dv::EventStore &nextEvent) {
 
       	// Scale factors close to 1 mean accumulation for a long time
         const double scaleFactor = 0.995; // A scale factor of 0 means no accumulation
@@ -93,7 +97,7 @@ int main(void) {
         const int maxClusters = 20; // This puts a limit on how many clusters can be formed
         const double clusterInitThresh = 0.9; // This is the value that a region in the blurred time surface must reach in order to initiate a cluster
         const int clusterSustainThresh = 18; // This is the number of events that must occur within a certain time inside a cluster in order for it to survive
-        const int clusterSustainTime = 3500000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
+        const int clusterSustainTime = 35000000; // This is the amount of time that the program waits before checking if a cluster needs to be removed
 
         const double radiusGrowth = 1.0007; // the rate of growth of a cluster when a nearby spike is found
         //const double radiusGrowth = 1;
@@ -284,6 +288,12 @@ int main(void) {
 					// draw each cluster
 					for (Cluster cluster : clusters) {
 						cluster.draw(trackImg);
+
+						int freq = cluster.getFrequency();
+
+						if (freq != - 1) {
+							dataLog << cluster.getID() << "," << freq << "," << endl;
+						}
 						//cluster.draw(resized);
 					}
 					

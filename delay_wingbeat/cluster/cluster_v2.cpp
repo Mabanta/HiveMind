@@ -167,7 +167,7 @@ void Cluster::newFreq() {
 }
 
 int Cluster::getFrequency() const {
-    return freq / 2;
+    return freq;
 }
 
 long Cluster::getID() {

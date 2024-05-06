@@ -11,8 +11,6 @@ Cluster::Cluster(unsigned int x, unsigned int y, cv::viz::Color color, float alp
     this->prev_y = (double)y;
     this->color = color;
     this->id = globId++;
-
-    blurredPixel = std::make_tuple(true, -1, 0.0, -1);
 }
 
 double Cluster::distance(unsigned int x, unsigned int y) {
@@ -63,33 +61,37 @@ void Cluster::newEvent() {
 }
 
 void Cluster::updateFreq(dv::Event event) {
-    // adjust x and y so it is the relative position in the array
-    // with the center at [10][10]
 
-    if (distance(event.x(), event.y()) > 2) {
+    /*
+    if (distance(event.x(), event.y()) > 3) {
         return;
     }
+    */
 
-    int64_t prevTime = std::get<1>(blurredPixel);
-    double runningAvg = std::get<2>(blurredPixel);
-    int transitionCount = std::get<3>(blurredPixel);
+    if (!event.polarity()) {
+        surfaceVal *= pow(0.1, (event.timestamp() - prevEvent));
+        prevEvent = event.timestamp();
 
-    if (event.polarity() && !std::get<0>(blurredPixel)) {
-        if (event.timestamp() - prevTime > 10000) {
-            transitionCount = 0;
-            runningAvg = 0;
-            prevTime = 0;
+        surfaceVal += 1;
+
+        if (surfaceVal >= surfaceThresh) {
+            //std::cout << surfaceVal << ", " << event.timestamp() - prevTime << std::endl;
+            if (event.timestamp() - prevTime > 100) {
+                if (prevTime != -1 && event.timestamp() - prevTime < 10000) {
+                    runningAvg = (7 * runningAvg + event.timestamp() - prevTime) / 8.0;
+                    samples++;
+                } else if (event.timestamp() - prevTime > 200000) {
+                    samples = 0;
+                    runningAvg = 0;
+                }
+
+                prevTime = event.timestamp();
+                
+            }
         }
 
-        if (prevTime > 0) {
-            runningAvg = (7 * runningAvg + (event.timestamp() - prevTime)) / 8;
-        }
-
-        prevTime = event.timestamp();
-        transitionCount++;
+        
     }
-
-    blurredPixel = std::make_tuple(event.polarity(), prevTime, runningAvg, transitionCount);
 }
 
 
@@ -122,8 +124,8 @@ void Cluster::draw(cv::Mat img) {
 
 int Cluster::getFrequency() {
     
-    if (std::get<3>(blurredPixel) >= 8 && std::get<2>(blurredPixel) > 0) {
-        return 1000000 / std::get<2>(blurredPixel) / 2;
+    if (samples >= 8) {
+        return 1000000 / runningAvg;
     }
 
     return -1;

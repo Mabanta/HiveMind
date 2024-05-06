@@ -61,15 +61,23 @@ void Cluster::newEvent() {
 }
 
 void Cluster::updateFreq(dv::Event event) {
-    if (event.polarity() != prevPol) {
+
+    if (event.polarity() && !prevPol) {
+        if (event.timestamp() - prevTime > 10000) {
+            transitionCount = 0;
+            runningAvg = 0;
+            prevTime = 0;
+        }
+
         if (prevTime > 0) {
-            runningAvg = (runningAvg + (event.timestamp() - prevTime)) / 16.0;
+            runningAvg = (7 * runningAvg + (event.timestamp() - prevTime)) / 8.0;
         }
 
         prevTime = event.timestamp();
-        prevPol = event.polarity();
         transitionCount++;
     }
+
+    prevPol = event.polarity();
 }
 
 
@@ -101,7 +109,7 @@ void Cluster::draw(cv::Mat img) {
 }
 
 int Cluster::getFrequency() {
-    if (transitionCount > 15) {
+    if (transitionCount > 7) {
         return runningAvg;
     }
 

@@ -37,7 +37,7 @@ int main(void)
 
 	vector<Cluster> clusters = vector<Cluster>();
 
-	String filePath = "./summer_bees_video_2022_08_13.aedat4";
+	String filePath = "../../delay_wingbeat/02_01_led.aedat4";
 	// String filePath = "./event_log_001.aedat4";
 	auto reader = dv::io::MonoCameraRecording(filePath);
 
@@ -71,7 +71,7 @@ int main(void)
 
 	// Intializes cluster frequency log
 	ofstream clusterLog;
-		clusterLog.open("freq_cluster_log_test.csv");
+		clusterLog.open("02_01_led_fc_freq.csv");
 		clusterLog << "Timestamp, Cluster ID, Returned Frequency, Noise Metric, ";
 		for (int i = 0; i < num_oscillators; i++)
 		{
@@ -128,7 +128,7 @@ int main(void)
 
 		// Opens frequency log file
 		ofstream clusterLog;
-		clusterLog.open("freq_cluster_log_test.csv", std::ios::app);
+		clusterLog.open("02_01_led_fc_freq.csv", std::ios::app);
 
 		if (nextEvent.isEmpty())
 			return;
